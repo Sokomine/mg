@@ -1,8 +1,11 @@
 VILLAGE_CHECK_RADIUS = 2
 VILLAGE_CHECK_COUNT = 1
+--VILLAGE_CHANCE = 28
+--VILLAGE_MIN_SIZE = 20
+--VILLAGE_MAX_SIZE = 40
 VILLAGE_CHANCE = 28
-VILLAGE_MIN_SIZE = 20
-VILLAGE_MAX_SIZE = 40
+VILLAGE_MIN_SIZE = 25
+VILLAGE_MAX_SIZE = 90 --55
 FIRST_ROADSIZE = 3
 BIG_ROAD_CHANCE = 0
 
@@ -43,7 +46,7 @@ function village_at_point(minp, noise1)
 	if noise1:get2d({x = x, y = z}) < -0.3 then return 0, 0, 0, 0 end
 	local size = pr:next(VILLAGE_MIN_SIZE, VILLAGE_MAX_SIZE)
 	local height = pr:next(5, 20)
-	--print("A village spawned at: x = "..x..", z = "..z)
+	print("A village spawned at: x = "..x..", z = "..z)
 	return x, z, size, height
 end
 
@@ -55,16 +58,28 @@ local function inside_village2(bx, sx, bz, sz, village, vnoise)
 	return inside_village(bx, bz, village, vnoise) and inside_village(bx+sx, bz, village, vnoise) and inside_village(bx, bz+sz, village, vnoise) and inside_village(bx+sx, bz+sz, village, vnoise)
 end
 
-local function choose_building(l, pr)
+local function choose_building(l, pr, village_type)
 	--::choose::
 	local btype
 	while true do
 		local p = pr:next(1, 3000)
 		for b, i in ipairs(buildings) do
-			if i.max_weight >= p then
+			if i.weight[ village_type ] and i.weight[ village_type ] > 0 and i.max_weight and i.max_weight[ village_type ] and i.max_weight[ village_type ] >= p then
 				btype = b
 				break
 			end
+		end
+		-- in case no building was found: take the last one that fits
+		if( not( btype )) then
+			for i=#buildings,1,-1 do
+				if( buildings[i].weight and buildings[i].weight[ village_type ] and buildings[i].weight[ village_type ] > 0 ) then
+					btype = i;
+					i = 1;
+				end
+			end
+		end
+		if( not( btype )) then
+			return 1;
 		end
 		if buildings[btype].pervillage ~= nil then
 			local n = 0
@@ -86,8 +101,8 @@ local function choose_building(l, pr)
 	--return btype
 end
 
-local function choose_building_rot(l, pr, orient)
-	local btype = choose_building(l, pr)
+local function choose_building_rot(l, pr, orient, village_type)
+	local btype = choose_building(l, pr, village_type)
 	local rotation
 	if buildings[btype].no_rotate then
 		rotation = 0
@@ -126,6 +141,7 @@ end
 
 local function generate_road(village, l, pr, roadsize, rx, rz, rdx, rdz, vnoise)
 	local vx, vz, vh, vs = village.vx, village.vz, village.vh, village.vs
+	local village_type   = village.village_type;
 	local calls_to_do = {}
 	local rxx = rx
 	local rzz = rz
@@ -159,7 +175,7 @@ local function generate_road(village, l, pr, roadsize, rx, rz, rdx, rdz, vnoise)
 					exitloop = true
 					break
 				end
-				btype, rotation, bsizex, bsizez = choose_building_rot(l, pr, orient1)
+				btype, rotation, bsizex, bsizez = choose_building_rot(l, pr, orient1, village_type)
 				bx = rx + math.abs(rdz)*(roadsize+1) - when(rdx==-1, bsizex-1, 0)
 				bz = rz + math.abs(rdx)*(roadsize+1) - when(rdz==-1, bsizez-1, 0)
 				if placeable(bx, bz, bsizex, bsizez, l) and inside_village2(bx, bsizex, bz, bsizez, village, vnoise) then
@@ -204,7 +220,7 @@ local function generate_road(village, l, pr, roadsize, rx, rz, rdx, rdz, vnoise)
 					exitloop = true
 					break
 				end
-				btype, rotation, bsizex, bsizez = choose_building_rot(l, pr, orient2)
+				btype, rotation, bsizex, bsizez = choose_building_rot(l, pr, orient2, village_type)
 				bx = rx - math.abs(rdz)*(bsizex+roadsize) - when(rdx==-1, bsizex-1, 0)
 				bz = rz - math.abs(rdx)*(bsizez+roadsize) - when(rdz==-1, bsizez-1, 0)
 				if placeable(bx, bz, bsizex, bsizez, l) and inside_village2(bx, bsizex, bz, bsizez, village, vnoise) then
@@ -251,6 +267,8 @@ local function generate_road(village, l, pr, roadsize, rx, rz, rdx, rdz, vnoise)
 		if pr:next(1, 100) <= BIG_ROAD_CHANCE then
 			new_roadsize = roadsize
 		end
+
+		--generate_road(vx, vz, vs, vh, l, pr, new_roadsize, i.rx, i.rz, i.rdx, i.rdz, vnoise)
 		calls[calls.index] = {village, l, pr, new_roadsize, i.rx, i.rz, i.rdx, i.rdz, vnoise}
 		calls.index = calls.index+1
 	end
@@ -260,6 +278,64 @@ local function generate_bpos(village, pr, vnoise)
 	local vx, vz, vh, vs = village.vx, village.vz, village.vh, village.vs
 	local l = {}
 	local rx = vx - vs
+	--[=[local l={}
+	local total_weight = 0
+	for _, i in ipairs(buildings) do
+		if i.weight == nil then i.weight = 1 end
+		total_weight = total_weight+i.weight
+		i.max_weight = total_weight
+	end
+	local multiplier = 3000/total_weight
+	for _,i in ipairs(buildings) do
+		i.max_weight = i.max_weight*multiplier
+	end
+	for i=1, 2000 do
+		bx = pr:next(vx-vs, vx+vs)
+		bz = pr:next(vz-vs, vz+vs)
+		::choose::
+		--[[btype = pr:next(1, #buildings)
+		if buildings[btype].chance ~= nil then
+			if pr:next(1, buildings[btype].chance) ~= 1 then
+				goto choose
+			end
+		end]]
+		p = pr:next(1, 3000)
+		for b, i in ipairs(buildings) do
+			if i.max_weight > p then
+				btype = b
+				break
+			end
+		end
+		if buildings[btype].pervillage ~= nil then
+			local n = 0
+			for j=1, #l do
+				if l[j].btype == btype then
+					n = n + 1
+				end
+			end
+			if n >= buildings[btype].pervillage then
+				goto choose
+			end
+		end
+		local rotation
+		if buildings[btype].no_rotate then
+			rotation = 0
+		else
+			rotation = pr:next(0, 3)
+		end
+		bsizex = buildings[btype].sizex
+		bsizez = buildings[btype].sizez
+		if rotation%2 == 1 then
+			bsizex, bsizez = bsizez, bsizex
+		end
+		if dist_center2(bx-vx, bsizex, bz-vz, bsizez)>vs*vs then goto out end
+		for _, a in ipairs(l) do
+			if math.abs(bx-a.x)<=(bsizex+a.bsizex)/2+2 and math.abs(bz-a.z)<=(bsizez+a.bsizez)/2+2 then goto out end
+		end
+		l[#l+1] = {x=bx, y=vh, z=bz, btype=btype, bsizex=bsizex, bsizez=bsizez, brotate = rotation}
+		::out::
+	end
+	return l]=]--
 	local rz = vz
 	while inside_village(rx, rz, village, vnoise) do
 		rx = rx - 1
@@ -269,17 +345,23 @@ local function generate_bpos(village, pr, vnoise)
 	generate_road(village, l, pr, FIRST_ROADSIZE, rx, rz, 1, 0, vnoise)
 	i = 1
 	while i < calls.index do
-		generate_road(unpack(calls[i]))
+		generate_road(unpack(calls[i])) -- TODO?
 		i = i+1
 	end
 	return l
 end
 
-local function generate_building(pos, minp, maxp, data, param2_data, a, pr, extranodes)
+local function generate_building(pos, minp, maxp, data, param2_data, a, pr, extranodes, replacements)
 	local binfo = buildings[pos.btype]
 	local scm
+
+	-- schematics of .mts type are not handled here; they need to be placed using place_schematics
+	if( binfo.is_mts == 1 ) then
+		return;
+	end
+
 	if type(binfo.scm) == "string" then
-		scm = import_scm(binfo.scm)
+		scm = import_scm(binfo.scm, replacements)
 	else
 		scm = binfo.scm
 	end
@@ -291,14 +373,24 @@ local function generate_building(pos, minp, maxp, data, param2_data, a, pr, extr
 	for z = 0, pos.bsizez-1 do
 		ax, ay, az = pos.x+x, pos.y+y+binfo.yoff, pos.z+z
 		if (ax >= minp.x and ax <= maxp.x) and (ay >= minp.y and ay <= maxp.y) and (az >= minp.z and az <= maxp.z) then
-			local t = scm[y+1][x+1][z+1]
+
+			-- in case the assumptions about the schematics dimension where wrong: fill up with red wool
+			if( not( scm[y+1] ) or not( scm[y+1][x+1] ) or not( scm[y+1][x+1][z+1] ))
+				then t = minetest.get_content_id("wool:red");
+			else
+				t = scm[y+1][x+1][z+1]
+			end
 			if type(t) == "table" then
+				if( t.node and t.node.name and replacements[ t.node.name ] ) then
+					t.node.name = replacements[ t.node.name ];
+				end
 				if t.extranode then
 					table.insert(extranodes, {node = t.node, meta = t.meta, pos = {x = ax, y = ay, z = az}})
 				else
 					data[a:index(ax, ay, az)] = t.node.content
 					param2_data[a:index(ax, ay, az)] = t.node.param2
 				end
+			-- air and gravel
 			elseif t ~= c_ignore then
 				data[a:index(ax, ay, az)] = t
 			end
@@ -307,6 +399,51 @@ local function generate_building(pos, minp, maxp, data, param2_data, a, pr, extr
 	end
 	end
 end
+
+
+-- similar to generate_building, except that it uses minetest.place_schematic(..) instead of changing voxelmanip data;
+-- this has advantages for nodes that use facedir;
+-- the function is called AFTER the mapgen data has been written in init.lua
+place_village_buildings = function( bpos, replacements )
+
+	local mts_path = minetest.get_modpath("mg").."/schems/";
+
+	for _, pos in ipairs( bpos ) do
+
+		local binfo = buildings[pos.btype];
+
+		-- this function is only responsible for files that are in .mts format
+		if( binfo.is_mts == 1 ) then
+
+			-- translate rotation
+			local rotation = "0";
+			if(     pos.brotate == 1 ) then
+				rotation = "90";
+			elseif( pos.brotate == 2 ) then
+				rotation = "180";
+			elseif( pos.brotate == 3 ) then
+				rotation = "270";
+			else
+				rotation = "0";
+			end
+
+			local p = { x = pos.x, y = pos.y, z = pos.z }; -- TODO
+
+			--print( 'WILL BUILD: '..minetest.serialize( { p = p, file=(mts_path..binfo.scm), r=rotation, replacements=replacements, force=true}));
+			-- force placement (we want entire buildings)
+---			minetest.place_schematic( p, mts_path..binfo.scm..'.mts', rotation, replacements, true);
+
+			minetest.set_node( p, {name='mg:building_spawner'});
+
+			-- store necessary data so that the building can pop up later on
+			local meta = minetest.get_meta( p );
+			meta:set_string( 'building_data', minetest.serialize( { file = binfo.scm, rotation = rotation, replacements = replacements } ));
+			meta:set_string( 'infotext',      'Automatic building spawner for '..tostring( binfo.scm ));
+		end
+	end
+end
+
+
 
 local MIN_DIST = 1
 
@@ -320,12 +457,37 @@ local function pos_far_buildings(x, z, l)
 	return true
 end
 
+
+local function generate_walls(bpos, data, a, minp, maxp, vh, vx, vz, vs, vnoise)
+	for x = minp.x, maxp.x do
+	for z = minp.z, maxp.z do
+		local xx = (vnoise:get2d({x=x, y=z})-2)*20+(40/(vs*vs))*((x-vx)*(x-vx)+(z-vz)*(z-vz))
+		if xx>=40 and xx <= 44 then
+			bpos[#bpos+1] = {x=x, z=z, y=vh, btype="wall", bsizex=1, bsizez=1, brotate=0}
+		end
+	end
+	end
+end
+
+
 function generate_village(village, minp, maxp, data, param2_data, a, vnoise)
 	local vx, vz, vs, vh = village.vx, village.vz, village.vs, village.vh
+	local village_type = village.village_type;
 	local seed = get_bseed({x=vx, z=vz})
 	local pr_village = PseudoRandom(seed)
 	local bpos = generate_bpos(village, pr_village, vnoise)
 
+if( not( village_type )) then
+--  village_type = village_types[ math.random(1, #village_types )]; -- TODO
+  village_type = village_types[ ((vx+vz)%(#village_types) )+1 ]; -- TODO
+end
+village_type = 'medieval'; -- TODO!
+
+	local bpos = generate_bpos(vx, vz, vs, vh, pr_village, vnoise, village_type)
+--print( 'RESULT of generate_bpos: '..minetest.serialize( bpos )); -- TODO
+print( 'VILLAGE TYPE: '..tostring( village_type ));
+	--generate_walls(bpos, data, a, minp, maxp, vh, vx, vz, vs, vnoise)
+>>>>>>> added new buildings; can now spawn diffrent village types; nodes can be replaced randomly for entire villages; support for .mts files
 	local pr = PseudoRandom(seed)
 	for _, g in ipairs(village.to_grow) do
 		if pos_far_buildings(g.x, g.z, bpos) then
@@ -333,9 +495,26 @@ function generate_village(village, minp, maxp, data, param2_data, a, vnoise)
 		end
 	end
 
+	local p = PseudoRandom(seed);
+	local replacements = {};	
+	if( village_type == 'medieval' ) then
+		replacements = nvillages.get_replacement_table( 'cottages', p );
+	elseif( village_type == 'nore' ) then
+		replacements = nvillages.get_replacement_table( 'nore',     p );
+	elseif( village_type == 'grasshut' ) then
+		replacements = nvillages.get_replacement_table( 'grasshut', p );
+	elseif( village_type == 'logcabin' ) then
+		replacements = nvillages.get_replacement_table( 'logcabin', p );
+	end
+print( minetest.serialize( replacements.table )..'\n...are the replacements for '..tostring( village_type )..'.'); -- TODO
+print( 'Village data: '..minetest.serialize( bpos )); -- TODO
+
 	local extranodes = {}
 	for _, pos in ipairs(bpos) do
-		generate_building(pos, minp, maxp, data, param2_data, a, pr_village, extranodes)
+		-- replacements are in table format for mapgen-based building spawning
+		generate_building(pos, minp, maxp, data, param2_data, a, pr_village, extranodes, replacements.table )
 	end
-	return extranodes
+	-- replacements are in list format for minetest.place_schematic(..) type spawning
+	return { extranodes = extranodes, bpos = bpos, replacements = replacements.list };
 end
+

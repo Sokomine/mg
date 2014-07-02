@@ -1,20 +1,211 @@
+
+village_types = { 'nore', 'logcabin', 'grasshut', 'medieval'};
+
 buildings = {
-	{sizex= 7,	sizez= 7,	yoff= 0,	ysize= 9,	scm="house", orients={2}},
-	{sizex= 9,	sizez= 9,	yoff= 0,	ysize= 2,	scm="wheat_field"},
-	{sizex= 9,	sizez= 9,	yoff= 0,	ysize= 2,	scm="cotton_field"},
-	{sizex= 3,	sizez= 3,	yoff= 1,	ysize= 4,	scm="lamp", weight=1/5, no_rotate=true},
-	{sizex= 4,	sizez= 4,	yoff=-5,	ysize=11,	scm="well", no_rotate=true, pervillage=1},
-	{sizex= 7,	sizez= 7,	yoff= 0,	ysize=11,	scm="fountain", weight=1/4, pervillage=3},
-	{sizex= 5,	sizez= 5,	yoff= 0,	ysize= 6,	scm="small_house", orients={3}},
-	{sizex= 6,	sizez=12,	yoff= 0,	ysize= 7,	scm="house_with_garden", orients={1}},
-	{sizex=16,	sizez=17,	yoff= 0,	ysize=12,	scm="church", orients={3}, pervillage=1},
-	{sizex= 5,	sizez= 5,	yoff= 0,	ysize=16,	scm="tower", orients={0}, weight=1/7},
-	{sizex= 8,	sizez= 9,	yoff= 0,	ysize= 6,	scm="forge", orients={0}, pervillage=2},
-	{sizex=11,	sizez=12,	yoff= 0,	ysize= 6,	scm="library", orients={1}, pervillage=2},
-	{sizex=15,	sizez= 7,	yoff= 0,	ysize=12,	scm="inn", orients={1}, pervillage=4, weight=1/2},
-	{sizex=22,	sizez=17,	yoff= 0,	ysize= 7,	scm="pub", orients={3}, pervillage=2, weight=1/3},
+
+
+-- the houses the mod came with
+	{sizex= 7,	sizez= 7,	yoff= 0,	ysize= 9,	scm="house", orients={2},                 weight={nore=1   }},
+	{sizex= 9,	sizez= 9,	yoff= 0,	ysize= 2,	scm="wheat_field",                        weight={nore=1   }},
+	{sizex= 9,	sizez= 9,	yoff= 0,	ysize= 2,	scm="cotton_field",                       weight={nore=1   }},
+	{sizex= 3,	sizez= 3,	yoff= 1,	ysize= 4,	scm="lamp", no_rotate=true,               weight={nore=1/5 }},
+	{sizex= 4,	sizez= 4,	yoff=-5,	ysize=11,	scm="well", no_rotate=true, pervillage=1, weight={nore=1   }},
+	{sizex= 7,	sizez= 7,	yoff= 0,	ysize=11,	scm="fountain", pervillage=3,             weight={nore=1/4 }},
+	{sizex= 5,	sizez= 5,	yoff= 0,	ysize= 6,	scm="small_house", orients={3},           weight={nore=1   }},
+	{sizex= 6,	sizez=12,	yoff= 0,	ysize= 7,	scm="house_with_garden", orients={1},     weight={nore=1   }},
+	{sizex=16,	sizez=17,	yoff= 0,	ysize=12,	scm="church", orients={3}, pervillage=1,  weight={nore=1   }},
+	{sizex= 5,	sizez= 5,	yoff= 0,	ysize=16,	scm="tower", orients={0},                 weight={nore=1/7 }},
+	{sizex= 8,	sizez= 9,	yoff= 0,	ysize= 6,	scm="forge", orients={0}, pervillage=2,   weight={nore=1   }},
+	{sizex=11,	sizez=12,	yoff= 0,	ysize= 6,	scm="library", orients={1}, pervillage=2, weight={nore=1   }},
+	{sizex=15,	sizez= 7,	yoff= 0,	ysize=12,	scm="inn", orients={1}, pervillage=4,     weight={nore=1/2 }},
+	{sizex=22,	sizez=17,	yoff= 0,	ysize= 7,	scm="pub", orients={3}, pervillage=2,     weight={nore=1/3 }},
+
+
+-- log cabins by Sokomine (requiring cottages, glasspanes)
+	{sizex= 6,	sizez= 4,	yoff= 0,	ysize= 5,	scm="logcabin1",  orients={1}, weight={logcabin=1}},
+	{sizex= 6,	sizez= 6,	yoff= 0,	ysize= 6,	scm="logcabin2",  orients={1}, weight={logcabin=1}},
+	{sizex= 6,	sizez= 6,	yoff= 0,	ysize= 6,	scm="logcabin3",  orients={1}, weight={logcabin=1}},
+	{sizex= 5,	sizez= 7,	yoff= 0,	ysize= 7,	scm="logcabin4",  orients={1}, weight={logcabin=1}},
+	{sizex= 5,	sizez= 5,	yoff= 0,	ysize= 5,	scm="logcabin5",  orients={1}, weight={logcabin=1}},
+	{sizex= 5,	sizez= 7,	yoff= 0,	ysize= 5,	scm="logcabin6",  orients={1}, weight={logcabin=1}},
+	{sizex= 7,	sizez= 7,	yoff= 0,	ysize= 7,	scm="logcabin7",  orients={1}, weight={logcabin=1}},
+	{sizex= 5,	sizez= 6,	yoff= 0,	ysize= 5,	scm="logcabin8",  orients={1}, weight={logcabin=1}},
+	{sizex= 5,	sizez= 5,	yoff= 0,	ysize= 6,	scm="logcabin9",  orients={1}, weight={logcabin=1}},
+	{sizex= 5,	sizez= 8,	yoff= 0,	ysize= 7,	scm="logcabin10", orients={1}, weight={logcabin=1}},
+	{sizex= 7,	sizez= 10,	yoff= 0,	ysize= 7,	scm="logcabin11", orients={1}, weight={logcabin=1}},
+	{sizex= 7,	sizez= 7,	yoff= 0,	ysize= 5,	scm="logcabin12rot", orients={2}, weight={logcabin=1}},
+	{sizex= 7,	sizez= 8,	yoff= 0,	ysize= 7,	scm="logcabin13rot", orients={2}, weight={logcabin=1}},
+
+-- grass huts (requiring cottages, dryplants, cavestuff/undergrowth, plantlife)
+	{sizex= 6,	sizez= 6,	yoff= 0,	ysize= 5,	scm="grasshut1", orients={2}, weight={grasshut=1}},
+	{sizex= 9,	sizez= 9,	yoff= 0,	ysize= 8,	scm="grasshut2", orients={2}, weight={grasshut=1}},
+	{sizex= 7,	sizez= 7,	yoff= 0,	ysize= 7,	scm="grasshut3", orients={2}, weight={grasshut=1}},
+	{sizex= 7,	sizez= 7,	yoff= 0,	ysize= 7,	scm="grasshut4", orients={2}, weight={grasshut=1}},
+	{sizex= 5,	sizez= 5,	yoff= 0,	ysize= 6,	scm="grasshut5", orients={2}, weight={grasshut=1}},
+	{sizex= 5,	sizez= 5,	yoff= 0,	ysize= 6,	scm="grasshut6", orients={2}, weight={grasshut=1}},
+	{sizex= 7,	sizez= 7,	yoff= 0,	ysize= 2,	scm="grasshutcenter", orients={2}, pervillage=1, weight={grasshut=2}},
+
+-- villages (requires cottages)
+--[[
+      	{sizex=26,	sizez=12,	yoff= 0,	ysize=19,	scm="church_1", orients={0}, pervillage=1, weight={medieval=3}}, 
+
+    	{sizex=12,	sizez= 9,	yoff= 0,	ysize=11,	scm="forge_1",  orients={0}, pervillage=1, weight={medieval=3}},
+
+    	{sizex=15,	sizez=15,	yoff= 0,	ysize=18,	scm="mill_1",   orients={2}, pervillage=1, weight={medieval=3}},
+
+    	{sizex= 9,	sizez= 7,	yoff= 0,	ysize= 6,	scm="hut_1",    orients={0},               weight={medieval=1}},
+
+    	{sizex=18,	sizez=16,	yoff= 0,	ysize=17,	scm="taverne_1", orients={0}, pervillage=1, weight={medieval=1/4 }},
+    	{sizex=11,	sizez=13,	yoff= 0,	ysize=13,	scm="taverne_2", orients={0}, pervillage=1, weight={medieval=1/4 }},
+    	{sizex=15,	sizez=15,	yoff= 0,	ysize=12,	scm="taverne_3", orients={0}, pervillage=1, weight={medieval=1/4 }},
+    	{sizex=10,	sizez=12,	yoff= 0,	ysize= 6,	scm="taverne_4", orients={0}, pervillage=1, weight={medieval=1/4 }},
+
+    	{sizex= 5,	sizez= 5,	yoff= 0,	ysize= 6,	scm="well_1",    orients={0}, pervillage=1, weight={medieval=1/5 }},
+    	{sizex= 5,	sizez= 6,	yoff= 0,	ysize= 6,	scm="well_2",    orients={0}, pervillage=1, weight={medieval=1/5 }},
+    	{sizex= 8,	sizez=10,	yoff= 0,	ysize= 7,	scm="well_3",    orients={0}, pervillage=1, weight={medieval=1/5 }},
+    	{sizex= 5,	sizez= 5,	yoff= 0,	ysize= 6,	scm="well_4",    orients={0}, pervillage=1, weight={medieval=1/5 }},
+    	{sizex= 3,	sizez= 3,	yoff= 0,	ysize= 5,	scm="well_5",    orients={0}, pervillage=1, weight={medieval=1/5 }},
+    	{sizex= 5,	sizez= 4,	yoff= 0,	ysize= 5,	scm="well_6",    orients={0}, pervillage=1, weight={medieval=1/5 }},
+    	{sizex= 8,	sizez= 8,	yoff= 0,	ysize= 4,	scm="well_7",    orients={0}, pervillage=1, weight={medieval=1/5 }},
+    	{sizex=10,	sizez= 5,	yoff= 0,	ysize= 4,	scm="well_8",    orients={0}, pervillage=1, weight={medieval=1/5 }},
+--]]
+
+--  	{sizex=13,	sizez=13,	yoff= 0,	ysize=6, 	scm="farm_full_1", orients={0}, weight={medieval=1}},
+--  	{sizex=14,	sizez=18,	yoff= 0,	ysize=10,	scm="farm_full_2", orients={0}, weight={medieval=1}},
+--  	{sizex=16,	sizez=14,	yoff= 0,	ysize=11,	scm="farm_full_3", orients={0}, weight={medieval=1}},
+--    	{sizex=18,	sizez=18,	yoff= 0,	ysize=14,	scm="farm_full_4", orients={0}, weight={medieval=1}},
+--  	{sizex=23,	sizez=14,	yoff= 0,	ysize=13,	scm="farm_full_5", orients={0}, weight={medieval=1}},
+--TODO  	{sizex=12,	sizez=12,	yoff= 0,	ysize=14,	scm="farm_full_6", orients={0}, weight={medieval=1}},
+
+    	{sizex=14,	sizez=12,	yoff= 0,	ysize= 8,	scm="farm_tiny_1", orients={0}, weight={medieval=1}},
+    	{sizex=12,	sizez=16,	yoff= 0,	ysize= 8,	scm="farm_tiny_2", orients={0}, weight={medieval=1}},
+    	{sizex=15,	sizez=16,	yoff= 0,	ysize=14,	scm="farm_tiny_3", orients={0}, weight={medieval=1}},
+    	{sizex=14,	sizez=17,	yoff= 0,	ysize=10,	scm="farm_tiny_4", orients={0}, weight={medieval=1}},
+    	{sizex=13,	sizez=19,	yoff= 0,	ysize= 9,	scm="farm_tiny_5", orients={0}, weight={medieval=1}},
+    	{sizex=15,	sizez=14,	yoff= 0,	ysize=10,	scm="farm_tiny_6", orients={0}, weight={medieval=1}}, -- oder 14 13?
+    	{sizex=13,	sizez=13,	yoff= 0,	ysize=13,	scm="farm_tiny_7", orients={0}, weight={medieval=1}},
+
+-- for the buildings below, sizex, sizez and ysize are read from the file directly;
+-- the entries "avoid" and "typ" are not used here
+
+-- schematics from my villages mod
+	{scm="church_1",        yoff= 1, orients={0}, farming_plus=0, avoid='', typ='church',    weight={medieval=4}, pervillage=1},    
+	{scm="forge_1",         yoff= 1, orients={0}, farming_plus=0, avoid='', typ='forge',     weight={medieval=2}, pervillage=1},
+	{scm="mill_1",          yoff= 1, orients={0}, farming_plus=0, avoid='', typ='mill',      weight={medieval=2}, pervillage=1},
+	{scm="hut_1",           yoff= 1, orients={0}, farming_plus=0, avoid='', typ='hut',       weight={medieval=1}},
+	{scm="farm_full_1",     yoff= 1, orients={0}, farming_plus=0, avoid='', typ='farm_full', weight={medieval=1/4}},
+	{scm="farm_full_2",     yoff= 1, orients={0}, farming_plus=0, avoid='', typ='farm_full', weight={medieval=1/4}},
+	{scm="farm_full_3",     yoff= 1, orients={0}, farming_plus=0, avoid='', typ='farm_full', weight={medieval=1/4}},
+	{scm="farm_full_4",     yoff= 1, orients={0}, farming_plus=0, avoid='', typ='farm_full', weight={medieval=1/4}},
+	{scm="farm_full_5",     yoff= 1, orients={0}, farming_plus=0, avoid='', typ='farm_full', weight={medieval=1/4}},
+	{scm="farm_full_6",     yoff= 1, orients={0}, farming_plus=0, avoid='', typ='farm_full', weight={medieval=1/4}},
+	{scm="farm_tiny_1",     yoff= 1, orients={0}, farming_plus=1, avoid='', typ='farm_tiny', weight={medieval=1}},
+	{scm="farm_tiny_2",     yoff= 1, orients={0}, farming_plus=1, avoid='', typ='farm_tiny', weight={medieval=1}},
+	{scm="farm_tiny_3",     yoff= 1, orients={0}, farming_plus=1, avoid='', typ='farm_tiny', weight={medieval=1}},
+	{scm="farm_tiny_4",     yoff= 1, orients={0}, farming_plus=1, avoid='', typ='farm_tiny', weight={medieval=1}},
+	{scm="farm_tiny_5",     yoff= 1, orients={0}, farming_plus=1, avoid='', typ='farm_tiny', weight={medieval=1}},
+	{scm="farm_tiny_6",     yoff= 1, orients={0}, farming_plus=1, avoid='', typ='farm_tiny', weight={medieval=1}},
+	{scm="farm_tiny_7",     yoff= 1, orients={0}, farming_plus=1, avoid='', typ='farm_tiny', weight={medieval=1}},
+	{scm="taverne_1",       yoff= 1, orients={0}, farming_plus=1, avoid='', typ='tavern',    weight={medieval=1/2}},
+	{scm="taverne_2",       yoff= 1, orients={0}, farming_plus=0, avoid='', typ='tavern',    weight={medieval=1/2}},
+	{scm="taverne_3",       yoff= 1, orients={0}, farming_plus=0, avoid='', typ='tavern',    weight={medieval=1/2}},
+	{scm="taverne_4",       yoff= 1, orients={0}, farming_plus=0, avoid='', typ='tavern',    weight={medieval=1/2}},
+	{scm="well_1",          yoff= 1, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/6}},
+	{scm="well_2",          yoff= 1, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/6}},
+	{scm="well_3",          yoff= 1, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/6}},
+	{scm="well_4",          yoff= 1, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/6}},
+	{scm="well_5",          yoff= 1, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/6}},
+	{scm="well_6",          yoff= 1, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/6}},
+	{scm="well_7",          yoff= 1, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/6}},
+	{scm="well_8",          yoff= 1, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/6}},
+
+	{scm="tree_place_1",    yoff= -1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=1/7}, pervillage=1},
+	{scm="tree_place_2",    yoff= -1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=1/7}, pervillage=1},
+	{scm="tree_place_3",    yoff= -1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=1/7}, pervillage=1},
+	{scm="tree_place_4",    yoff= -1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=1/7}, pervillage=1},
+	{scm="tree_place_5",    yoff= -1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=1/7}, pervillage=1},
+	{scm="tree_place_6",    yoff= -1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=1/7}, pervillage=1},
+	{scm="tree_place_7",    yoff= -1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=1/7}, pervillage=1},
+	{scm="tree_place_8",    yoff= -1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=3}, pervillage=1},
+	{scm="tree_place_9",    yoff= -1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=3}, pervillage=1},
+	{scm="tree_place_10",   yoff= -1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=3}, pervillage=1},
+
+   -- Houses from Taokis Structure I/O Mod (see https://forum.minetest.net/viewtopic.php?id=5524)
+	{scm="default_farm_large",     yoff= 1, orients={2}, farming_plus=0, avoid='', typ='farm_full', weight={taoki=1}},
+	{scm="default_farm_small",     yoff= 1, orients={2}, farming_plus=1, avoid='', typ='farm_tiny', weight={taoki=2}},
+	{scm="default_house_large",    yoff= 0, orients={2}, farming_plus=0, avoid='', typ='house',     weight={taoki=1}},
+	{scm="default_house_medium",   yoff= 0, orients={2}, farming_plus=0, avoid='', typ='house',     weight={taoki=1}},
+	{scm="default_house_small",    yoff= 0, orients={2}, farming_plus=0, avoid='', typ='house',     weight={taoki=2}},
+	{scm="default_tower",          yoff= 0, orients={2}, farming_plus=0, avoid='', typ='tower',     weight={taoki=1/2}},
+	{scm="default_fountain_large", yoff= 0, orients={2}, farming_plus=0, avoid='well', typ='well',  weight={taoki=1/5}},
+	{scm="default_fountain_small", yoff= 0, orients={2}, farming_plus=0, avoid='well', typ='well',  weight={taoki=1/5}},
+	{scm="default_pole",           yoff= 0, orients={2}, farming_plus=0, avoid='',     typ='deko',  weight={taoki=1}},
+
+   -- TODO: include houses from LadyMacBeth
 }
 
+
+-- read the data files and fill in information like size and nodes that need on_construct to be called after placing
+mg_buildings_init = function()
+
+	local mts_path = minetest.get_modpath("mg").."/schems/";
+	-- determine the size of the given houses
+	for i,v in ipairs( buildings ) do
+     
+
+		-- read the size of the building
+		local res  = handle_schematics.analyze_mts_file( mts_path..buildings[ i ].scm ); 
+
+		-- provided the file could be analyzed successfully
+		if( res and res.size.x ) then
+			-- the file has to be placed with minetest.place_schematic(...)
+			buildings[ i ].is_mts = 1;
+
+			buildings[ i ].sizex = res.size.x;
+				buildings[ i ].sizez = res.size.z;
+			buildings[ i ].ysize = res.size.y;
+			
+			-- some buildings may be rotated
+			if(  (buildings[ i ].orients and buildings[ i ].orients[1] == 1 )
+			  or (buildings[ i ].orients and buildings[ i ].orients[1] == 3 )
+			  or  res.rotated == 90
+			  or  res.rotated == 270 ) then
+
+				buildings[ i ].sizex = res.size.z;
+				buildings[ i ].sizez = res.size.x;
+			end
+
+			if( not( buildings[ i ].yoff ) or buildings[ i ].yoff == 0 ) then
+				buildings[ i ].yoff = res.burried;
+			end
+
+			-- we do need at least the list of nodenames which will need on_constr later on
+			buildings[ i ].nodenames        = res.nodenames;
+			buildings[ i ].on_constr        = res.on_constr;
+			buildings[ i ].after_place_node = res.after_place_node;
+
+		-- missing data regarding building size - do not use this building for anything
+		elseif( not( buildings[ i ].sizex )    or not( buildings[ i ].sizez )
+			or   buildings[ i ].sizex == 0 or      buildings[ i ].sizez==0) then
+
+			-- no village will use it
+			buildings[ i ].weight = {};
+
+		else
+			-- the file has to be handled by worldedit; it is no .mts file
+			buildings[ i ].is_mts = 0;
+		end
+		-- print it for debugging usage
+   		--print( v.scm .. ': '..tostring(buildings[i].sizex)..' x '..tostring(buildings[i].sizez)..' x '..tostring(buildings[i].ysize)..' h');
+	end
+end
+
+
+-- call the initialization function above
+mg_buildings_init();
+
+
+--local gravel = minetest.get_content_id("default:gravel")
 local gravel = minetest.get_content_id("default:gravel")
 local rgravel = {}
 for i = 1, 2000 do
@@ -43,13 +234,34 @@ end
 buildings["wall"] = {yoff = 1, ysize = 6, scm = wall}
 
 
-local total_weight = 0
-for _, i in ipairs(buildings) do
-	if i.weight == nil then i.weight = 1 end
-	total_weight = total_weight+i.weight
-	i.max_weight = total_weight
-end
-local multiplier = 3000/total_weight
-for _,i in ipairs(buildings) do
-	i.max_weight = i.max_weight*multiplier
+--local total_weight = 0
+--for _, i in ipairs(buildings) do
+--	if i.weight == nil then i.weight = 1 end
+--	total_weight = total_weight+i.weight
+--	i.max_weight = total_weight
+--end
+--local multiplier = 3000/total_weight
+--for _,i in ipairs(buildings) do
+--	i.max_weight = i.max_weight*multiplier
+--end
+
+
+for j,v in ipairs( village_types ) do
+	
+	local total_weight = 0
+	for _, i in ipairs(buildings) do
+		if( not( i.max_weight )) then
+			i.max_weight = {};
+		end
+		if( i.weight and i.weight[ v ] and i.weight[ v ]>0 ) then
+			total_weight = total_weight+i.weight[ v ]
+			i.max_weight[v] = total_weight
+		end
+	end
+	local multiplier = 3000/total_weight
+	for _,i in ipairs(buildings) do
+		if( i.weight and i.weight[ v ] and i.weight[ v ]>0 ) then
+			i.max_weight[v] = i.max_weight[ v ]*multiplier
+		end
+	end
 end
