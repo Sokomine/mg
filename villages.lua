@@ -1,8 +1,11 @@
 VILLAGE_CHECK_RADIUS = 2
 VILLAGE_CHECK_COUNT = 1
+--VILLAGE_CHANCE = 28
+--VILLAGE_MIN_SIZE = 20
+--VILLAGE_MAX_SIZE = 40
 VILLAGE_CHANCE = 28
-VILLAGE_MIN_SIZE = 20
-VILLAGE_MAX_SIZE = 40
+VILLAGE_MIN_SIZE = 25
+VILLAGE_MAX_SIZE = 90 --55
 FIRST_ROADSIZE = 3
 BIG_ROAD_CHANCE = 0
 
@@ -55,16 +58,28 @@ local function inside_village2(bx, sx, bz, sz, vx, vz, vs, vnoise)
 	return inside_village(bx, bz, vx, vz, vs, vnoise) and inside_village(bx+sx, bz, vx, vz, vs, vnoise) and inside_village(bx, bz+sz, vx, vz, vs, vnoise) and inside_village(bx+sx, bz+sz, vx, vz, vs, vnoise)
 end
 
-local function choose_building(l, pr)
+local function choose_building(l, pr, village_type)
 	--::choose::
 	local btype
 	while true do
 		local p = pr:next(1, 3000)
 		for b, i in ipairs(buildings) do
-			if i.max_weight >= p then
+			if i.weight[ village_type ] and i.weight[ village_type ] > 0 and i.max_weight and i.max_weight[ village_type ] and i.max_weight[ village_type ] >= p then
 				btype = b
 				break
 			end
+		end
+		-- in case no building was found: take the last one that fits
+		if( not( btype )) then
+			for i=#buildings,1,-1 do
+				if( buildings[i].weight and buildings[i].weight[ village_type ] and buildings[i].weight[ village_type ] > 0 ) then
+					btype = i;
+					i = 1;
+				end
+			end
+		end
+		if( not( btype )) then
+			return 1;
 		end
 		if buildings[btype].pervillage ~= nil then
 			local n = 0
@@ -86,8 +101,8 @@ local function choose_building(l, pr)
 	--return btype
 end
 
-local function choose_building_rot(l, pr, orient)
-	local btype = choose_building(l, pr)
+local function choose_building_rot(l, pr, orient, village_type)
+	local btype = choose_building(l, pr, village_type)
 	local rotation
 	if buildings[btype].no_rotate then
 		rotation = 0
@@ -124,7 +139,7 @@ local function when(a, b, c)
 	if a then return b else return c end
 end
 
-local function generate_road(vx, vz, vs, vh, l, pr, roadsize, rx, rz, rdx, rdz, vnoise)
+local function generate_road(vx, vz, vs, vh, l, pr, roadsize, rx, rz, rdx, rdz, vnoise, village_type)
 	local calls_to_do = {}
 	local rxx = rx
 	local rzz = rz
@@ -158,7 +173,7 @@ local function generate_road(vx, vz, vs, vh, l, pr, roadsize, rx, rz, rdx, rdz, 
 					exitloop = true
 					break
 				end
-				btype, rotation, bsizex, bsizez = choose_building_rot(l, pr, orient1)
+				btype, rotation, bsizex, bsizez = choose_building_rot(l, pr, orient1, village_type)
 				bx = rx + math.abs(rdz)*(roadsize+1) - when(rdx==-1, bsizex-1, 0)
 				bz = rz + math.abs(rdx)*(roadsize+1) - when(rdz==-1, bsizez-1, 0)
 				if placeable(bx, bz, bsizex, bsizez, l) and inside_village2(bx, bsizex, bz, bsizez, vx, vz, vs, vnoise) then
@@ -203,7 +218,7 @@ local function generate_road(vx, vz, vs, vh, l, pr, roadsize, rx, rz, rdx, rdz, 
 					exitloop = true
 					break
 				end
-				btype, rotation, bsizex, bsizez = choose_building_rot(l, pr, orient2)
+				btype, rotation, bsizex, bsizez = choose_building_rot(l, pr, orient2, village_type)
 				bx = rx - math.abs(rdz)*(bsizex+roadsize) - when(rdx==-1, bsizex-1, 0)
 				bz = rz - math.abs(rdx)*(bsizez+roadsize) - when(rdz==-1, bsizez-1, 0)
 				if placeable(bx, bz, bsizex, bsizez, l) and inside_village2(bx, bsizex, bz, bsizez, vx, vz, vs, vnoise) then
@@ -250,12 +265,12 @@ local function generate_road(vx, vz, vs, vh, l, pr, roadsize, rx, rz, rdx, rdz, 
 			new_roadsize = roadsize
 		end
 		--generate_road(vx, vz, vs, vh, l, pr, new_roadsize, i.rx, i.rz, i.rdx, i.rdz, vnoise)
-		calls[calls.index] = {vx, vz, vs, vh, l, pr, new_roadsize, i.rx, i.rz, i.rdx, i.rdz, vnoise}
+		calls[calls.index] = {vx, vz, vs, vh, l, pr, new_roadsize, i.rx, i.rz, i.rdx, i.rdz, vnoise, village_type}
 		calls.index = calls.index+1
 	end
 end
 
-local function generate_bpos(vx, vz, vs, vh, pr, vnoise)
+local function generate_bpos(vx, vz, vs, vh, pr, vnoise, village_type)
 	--[=[local l={}
 	local total_weight = 0
 	for _, i in ipairs(buildings) do
@@ -322,10 +337,10 @@ local function generate_bpos(vx, vz, vs, vh, pr, vnoise)
 	end
 	rx = rx + 5
 	calls = {index = 1}
-	generate_road(vx, vz, vs, vh, l, pr, FIRST_ROADSIZE, rx, rz, 1, 0, vnoise)
+	generate_road(vx, vz, vs, vh, l, pr, FIRST_ROADSIZE, rx, rz, 1, 0, vnoise, village_type)
 	i = 1
 	while i < calls.index do
-		generate_road(unpack(calls[i]))
+		generate_road(unpack(calls[i])) -- TODO?
 		i = i+1
 	end
 	return l
@@ -372,11 +387,17 @@ local function generate_bpos(vx, vz, vs, vh, pr, vnoise)
 	return l]=]
 end
 
-local function generate_building(pos, minp, maxp, data, a, pr, extranodes)
+local function generate_building(pos, minp, maxp, data, a, pr, extranodes, replacements)
 	local binfo = buildings[pos.btype]
 	local scm
+
+	-- schematics of .mts type are not handled here; they need to be placed using place_schematics
+	if( binfo.is_mts == 1 ) then
+		return;
+	end
+
 	if type(binfo.scm) == "string" then
-		scm = import_scm(binfo.scm)
+		scm = import_scm(binfo.scm, replacements)
 	else
 		scm = binfo.scm
 	end
@@ -389,9 +410,18 @@ local function generate_building(pos, minp, maxp, data, a, pr, extranodes)
 	for z = 0, pos.bsizez-1 do
 		ax, ay, az = pos.x+x, pos.y+y+binfo.yoff, pos.z+z
 		if (ax >= minp.x and ax <= maxp.x) and (ay >= minp.y and ay <= maxp.y) and (az >= minp.z and az <= maxp.z) then
-			t = scm[y+1][x+1][z+1]
+			-- in case the assumptions about the schematics dimension where wrong: fill up with red wool
+			if( not( scm[y+1] ) or not( scm[y+1][x+1] ) or not( scm[y+1][x+1][z+1] ))
+				then t = minetest.get_content_id("wool:red");
+			else
+				t = scm[y+1][x+1][z+1]
+			end
 			if type(t) == "table" then
+				if( t.node and t.node.name and replacements[ t.node.name ] ) then
+					t.node.name = replacements[ t.node.name ];
+				end
 				table.insert(extranodes, {node=t.node, meta=t.meta, pos={x=ax, y=ay, z=az},})
+			-- air and gravel
 			elseif t ~= c_ignore then
 				data[a:index(ax, ay, az)] = t
 			end
@@ -400,6 +430,51 @@ local function generate_building(pos, minp, maxp, data, a, pr, extranodes)
 	end
 	end
 end
+
+
+-- similar to generate_building, except that it uses minetest.place_schematic(..) instead of changing voxelmanip data;
+-- this has advantages for nodes that use facedir;
+-- the function is called AFTER the mapgen data has been written in init.lua
+place_village_buildings = function( bpos, replacements )
+
+	local mts_path = minetest.get_modpath("mg").."/schems/";
+
+	for _, pos in ipairs( bpos ) do
+
+		local binfo = buildings[pos.btype];
+
+		-- this function is only responsible for files that are in .mts format
+		if( binfo.is_mts == 1 ) then
+
+			-- translate rotation
+			local rotation = "0";
+			if(     pos.brotate == 1 ) then
+				rotation = "90";
+			elseif( pos.brotate == 2 ) then
+				rotation = "180";
+			elseif( pos.brotate == 3 ) then
+				rotation = "270";
+			else
+				rotation = "0";
+			end
+
+			local p = { x = pos.x, y = pos.y, z = pos.z }; -- TODO
+
+			--print( 'WILL BUILD: '..minetest.serialize( { p = p, file=(mts_path..binfo.scm), r=rotation, replacements=replacements, force=true}));
+			-- force placement (we want entire buildings)
+---			minetest.place_schematic( p, mts_path..binfo.scm..'.mts', rotation, replacements, true);
+
+			minetest.set_node( p, {name='mg:building_spawner'});
+
+			-- store necessary data so that the building can pop up later on
+			local meta = minetest.get_meta( p );
+			meta:set_string( 'building_data', minetest.serialize( { file = binfo.scm, rotation = rotation, replacements = replacements } ));
+			meta:set_string( 'infotext',      'Automatic building spawner for '..tostring( binfo.scm ));
+		end
+	end
+end
+
+
 
 local MIN_DIST = 1
 
@@ -423,10 +498,19 @@ local function generate_walls(bpos, data, a, minp, maxp, vh, vx, vz, vs, vnoise)
 	end
 end
 
-function generate_village(vx, vz, vs, vh, minp, maxp, data, a, vnoise, to_grow)
+function generate_village(vx, vz, vs, vh, minp, maxp, data, a, vnoise, to_grow, village_type)
 	local seed = get_bseed({x=vx, z=vz})
 	local pr_village = PseudoRandom(seed)
-	local bpos = generate_bpos(vx, vz, vs, vh, pr_village, vnoise)
+
+if( not( village_type )) then
+--  village_type = village_types[ math.random(1, #village_types )]; -- TODO
+  village_type = village_types[ ((vx+vz)%(#village_types) )+1 ]; -- TODO
+end
+village_type = 'medieval'; -- TODO!
+
+	local bpos = generate_bpos(vx, vz, vs, vh, pr_village, vnoise, village_type)
+--print( 'RESULT of generate_bpos: '..minetest.serialize( bpos )); -- TODO
+print( 'VILLAGE TYPE: '..tostring( village_type ));
 	--generate_walls(bpos, data, a, minp, maxp, vh, vx, vz, vs, vnoise)
 	local pr = PseudoRandom(seed)
 	for _, g in ipairs(to_grow) do
@@ -434,9 +518,61 @@ function generate_village(vx, vz, vs, vh, minp, maxp, data, a, vnoise, to_grow)
 			mg.registered_trees[g.id].grow(data, a, g.x, g.y, g.z, minp, maxp, pr)
 		end
 	end
+
+	local p = PseudoRandom(seed);
+	local replacements = {};	
+	if( village_type == 'medieval' ) then
+		replacements = nvillages.get_replacement_table( 'cottages', p );
+	elseif( village_type == 'nore' ) then
+		replacements = nvillages.get_replacement_table( 'nore',     p );
+	elseif( village_type == 'grasshut' ) then
+		replacements = nvillages.get_replacement_table( 'grasshut', p );
+	elseif( village_type == 'logcabin' ) then
+		replacements = nvillages.get_replacement_table( 'logcabin', p );
+	end
+print( minetest.serialize( replacements.table )..'\n...are the replacements for '..tostring( village_type )..'.'); -- TODO
+print( 'Village data: '..minetest.serialize( bpos )); -- TODO
+
 	local extranodes = {}
 	for _, pos in ipairs(bpos) do
-		generate_building(pos, minp, maxp, data, a, pr_village, extranodes)
+		-- replacements are in table format for mapgen-based building spawning
+		generate_building(pos, minp, maxp, data, a, pr_village, extranodes, replacements.table )
 	end
-	return extranodes
+	-- replacements are in list format for minetest.place_schematic(..) type spawning
+	return { extranodes = extranodes, bpos = bpos, replacements = replacements.list };
 end
+
+
+-- the building spawner that takes care of schematics
+minetest.register_node("mg:building_spawner", {
+	description = "Automatic building spawner for villages",
+	tiles = {"wool_black.png"},
+	-- can't be digged
+	groups = {},
+})
+
+
+
+minetest.register_abm({
+	nodenames = {"mg:building_spawner"},
+	interval = 5,
+	chance = 1,
+	action = function(pos, node)
+
+		local meta = minetest.get_meta( pos );
+		local ser_data = meta:get_string('building_data'); 
+		
+		if( not( ser_data ) or ser_data=='' ) then
+			return;
+		end
+
+		local data = minetest.deserialize( ser_data );
+		if( not( data ) or not( data.file ) or not( data.rotation ) or not( data.replacements )) then
+			return;
+		end
+		local mts_path = minetest.get_modpath("mg").."/schems/";
+		minetest.place_schematic( pos, mts_path..data.file..'.mts', data.rotation, data.replacements, true);
+                print( 'PLACED BUILDING '..tostring( data.file )..' AT '..minetest.pos_to_string( pos )..'.');
+	end
+})
+

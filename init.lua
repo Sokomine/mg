@@ -330,7 +330,15 @@ end
 
 dofile(minetest.get_modpath(minetest.get_current_modname()).."/we.lua")
 dofile(minetest.get_modpath(minetest.get_current_modname()).."/rotate.lua")
+
+-- read size from schematics files directly
+dofile(minetest.get_modpath(minetest.get_current_modname()).."/analyze_mts_file.lua") 
+
 dofile(minetest.get_modpath(minetest.get_current_modname()).."/buildings.lua")
+
+-- replace some materials for entire villages randomly
+dofile(minetest.get_modpath(minetest.get_current_modname()).."/replacements.lua")
+
 dofile(minetest.get_modpath(minetest.get_current_modname()).."/villages.lua")
 dofile(minetest.get_modpath(minetest.get_current_modname()).."/ores.lua")
 
@@ -609,7 +617,7 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 		generate_vein(minetest.get_content_id(ore.name), minetest.get_content_id(ore.wherein), minp, maxp, ore.seeddiff, ore, data, a, va)
 	end
 	
-	local to_add = generate_village(vx, vz, vs, vh, minp, maxp, data, a, village_noise, villages_to_grow)
+	local to_add_data = generate_village(vx, vz, vs, vh, minp, maxp, data, a, village_noise, villages_to_grow)
 
 	vm:set_data(data)
 
@@ -621,7 +629,7 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 	vm:write_to_map(data)
 
 	local meta
-	for _, n in pairs(to_add) do
+	for _, n in pairs(to_add_data.extranodes) do
 		minetest.set_node(n.pos, n.node)
 		if n.meta ~= nil then
 			meta = minetest.get_meta(n.pos)
@@ -649,6 +657,9 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 			end
 		end
 	end
+
+	-- now add those buildings which are .mts files and need to be placed by minetest.place_schematic(...)
+	place_village_buildings( to_add_data.bpos, to_add_data.replacements );
 end
 
 minetest.register_on_generated(function(minp, maxp, seed)
