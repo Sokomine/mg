@@ -435,7 +435,7 @@ end
 -- similar to generate_building, except that it uses minetest.place_schematic(..) instead of changing voxelmanip data;
 -- this has advantages for nodes that use facedir;
 -- the function is called AFTER the mapgen data has been written in init.lua
-place_village_buildings = function( bpos, replacements )
+place_village_buildings = function( bpos, replacements, voxelarea )
 
 	local mts_path = minetest.get_modpath("mg").."/schems/";
 
@@ -446,30 +446,39 @@ place_village_buildings = function( bpos, replacements )
 		-- this function is only responsible for files that are in .mts format
 		if( binfo.is_mts == 1 ) then
 
-			-- translate rotation
-			local rotation = "0";
-			if(     pos.brotate == 1 ) then
-				rotation = "90";
-			elseif( pos.brotate == 2 ) then
-				rotation = "180";
-			elseif( pos.brotate == 3 ) then
-				rotation = "270";
-			else
-				rotation = "0";
+			-- Just to be on the safe side, we do take the largest possible extension of the building, because if it is rotated,
+			-- x and z would be switched.
+			-- We need to check all 8 corners of the building.
+			-- This will only work for buildings that are smaller than chunk size (relevant here: about 111 nodes)
+			local max_xz = math.max( binfo.sizex, binfo.sizez );
+
+			-- the function only spawns buildings which are at least partly contained in this chunk/voxelarea
+			if( voxelarea
+			   and ( voxelarea:contains( pos.x,          pos.y - binfo.yoff, pos.z )
+			      or voxelarea:contains( pos.x + max_xz, pos.y - binfo.yoff, pos.z )
+			      or voxelarea:contains( pos.x,          pos.y - binfo.yoff, pos.z + max_xz )
+			      or voxelarea:contains( pos.x + max_xz, pos.y - binfo.yoff, pos.z + max_xz )
+			      or voxelarea:contains( pos.x,          pos.y - binfo.yoff + binfo.ysize, pos.z )
+			      or voxelarea:contains( pos.x + max_xz, pos.y - binfo.yoff + binfo.ysize, pos.z )
+			      or voxelarea:contains( pos.x,          pos.y - binfo.yoff + binfo.ysize, pos.z + max_xz )
+			      or voxelarea:contains( pos.x + max_xz, pos.y - binfo.yoff + binfo.ysize, pos.z + max_xz ) )) then
+
+				-- translate rotation
+				local rotation = "0";
+				if(     pos.brotate == 1 ) then
+					rotation = "90";
+				elseif( pos.brotate == 2 ) then
+					rotation = "180";
+				elseif( pos.brotate == 3 ) then
+					rotation = "270";
+				else
+					rotation = "0";
+				end
+	
+				print( 'PLACED BUILDING '..tostring( binfo.scm )..' AT '..minetest.pos_to_string( pos )..'. Max. size: '..tostring( max_xz ));
+				-- force placement (we want entire buildings)
+				minetest.place_schematic( pos, mts_path..binfo.scm..'.mts', rotation, replacements, true);
 			end
-
-			local p = { x = pos.x, y = pos.y, z = pos.z }; -- TODO
-
-			--print( 'WILL BUILD: '..minetest.serialize( { p = p, file=(mts_path..binfo.scm), r=rotation, replacements=replacements, force=true}));
-			-- force placement (we want entire buildings)
----			minetest.place_schematic( p, mts_path..binfo.scm..'.mts', rotation, replacements, true);
-
-			minetest.set_node( p, {name='mg:building_spawner'});
-
-			-- store necessary data so that the building can pop up later on
-			local meta = minetest.get_meta( p );
-			meta:set_string( 'building_data', minetest.serialize( { file = binfo.scm, rotation = rotation, replacements = replacements } ));
-			meta:set_string( 'infotext',      'Automatic building spawner for '..tostring( binfo.scm ));
 		end
 	end
 end
@@ -548,38 +557,3 @@ village_type = 'medieval'; -- TODO!
 	-- replacements are in list format for minetest.place_schematic(..) type spawning
 	return { extranodes = extranodes, bpos = bpos, replacements = replacements.list };
 end
-
-
--- the building spawner that takes care of schematics
-minetest.register_node("mg:building_spawner", {
-	description = "Automatic building spawner for villages",
-	tiles = {"wool_black.png"},
-	-- can't be digged
-	groups = {},
-})
-
-
-
-minetest.register_abm({
-	nodenames = {"mg:building_spawner"},
-	interval = 5,
-	chance = 1,
-	action = function(pos, node)
-
-		local meta = minetest.get_meta( pos );
-		local ser_data = meta:get_string('building_data'); 
-		
-		if( not( ser_data ) or ser_data=='' ) then
-			return;
-		end
-
-		local data = minetest.deserialize( ser_data );
-		if( not( data ) or not( data.file ) or not( data.rotation ) or not( data.replacements )) then
-			return;
-		end
-		local mts_path = minetest.get_modpath("mg").."/schems/";
-		minetest.place_schematic( pos, mts_path..data.file..'.mts', data.rotation, data.replacements, true);
-                print( 'PLACED BUILDING '..tostring( data.file )..' AT '..minetest.pos_to_string( pos )..'.');
-	end
-})
-
