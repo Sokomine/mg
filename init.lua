@@ -617,7 +617,15 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 		generate_vein(minetest.get_content_id(ore.name), minetest.get_content_id(ore.wherein), minp, maxp, ore.seeddiff, ore, data, a, va)
 	end
 	
-	local to_add_data = generate_village(vx, vz, vs, vh, minp, maxp, data, a, village_noise, villages_to_grow)
+	local top_node = 'default:dirt_with_grass';
+ 	-- replace dirt_with_grass with whatever is common in that biome
+	if(     top == c_sand       ) then top_node = 'default:sand';
+	elseif( top == c_dsert_sand ) then top_node = 'default:desert_sand';
+	elseif( top == c_dry_grass  ) then top_node = 'mg:dirt_with_dry_grass';
+	elseif( top == c_dirt_snow  ) then top_node = 'default:dirt_with_snow';
+	else                               top_node = 'default:dirt_with_grass';
+	end
+	local to_add_data = generate_village(vx, vz, vs, vh, minp, maxp, data, a, village_noise, villages_to_grow, nil, top_node )
 
 	vm:set_data(data)
 
