@@ -469,8 +469,7 @@ local function generate_walls(bpos, data, a, minp, maxp, vh, vx, vz, vs, vnoise)
 	end
 end
 
-
-function generate_village(village, minp, maxp, data, param2_data, a, vnoise)
+function generate_village(village, minp, maxp, data, param2_data, a, vnoise, dirt_with_grass_replacement)
 	local vx, vz, vs, vh = village.vx, village.vz, village.vs, village.vh
 	local village_type = village.village_type;
 	local seed = get_bseed({x=vx, z=vz})
@@ -485,9 +484,8 @@ village_type = 'medieval'; -- TODO!
 
 	local bpos = generate_bpos(vx, vz, vs, vh, pr_village, vnoise, village_type)
 --print( 'RESULT of generate_bpos: '..minetest.serialize( bpos )); -- TODO
-print( 'VILLAGE TYPE: '..tostring( village_type ));
+--print( 'VILLAGE TYPE: '..tostring( village_type ));
 	--generate_walls(bpos, data, a, minp, maxp, vh, vx, vz, vs, vnoise)
->>>>>>> added new buildings; can now spawn diffrent village types; nodes can be replaced randomly for entire villages; support for .mts files
 	local pr = PseudoRandom(seed)
 	for _, g in ipairs(village.to_grow) do
 		if pos_far_buildings(g.x, g.z, bpos) then
@@ -498,16 +496,23 @@ print( 'VILLAGE TYPE: '..tostring( village_type ));
 	local p = PseudoRandom(seed);
 	local replacements = {};	
 	if( village_type == 'medieval' ) then
-		replacements = nvillages.get_replacement_table( 'cottages', p );
+		replacements = nvillages.get_replacement_table( 'cottages', p, dirt_with_grass_replacement );
 	elseif( village_type == 'nore' ) then
-		replacements = nvillages.get_replacement_table( 'nore',     p );
+		replacements = nvillages.get_replacement_table( 'nore',     p, dirt_with_grass_replacement );
 	elseif( village_type == 'grasshut' ) then
-		replacements = nvillages.get_replacement_table( 'grasshut', p );
+		replacements = nvillages.get_replacement_table( 'grasshut', p, dirt_with_grass_replacement );
 	elseif( village_type == 'logcabin' ) then
-		replacements = nvillages.get_replacement_table( 'logcabin', p );
+		replacements = nvillages.get_replacement_table( 'logcabin', p, dirt_with_grass_replacement );
 	end
-print( minetest.serialize( replacements.table )..'\n...are the replacements for '..tostring( village_type )..'.'); -- TODO
-print( 'Village data: '..minetest.serialize( bpos )); -- TODO
+
+--	if( not( replacements.list )) then
+--		replacements.list = {};
+--	end
+	if( not( replacements.table )) then
+		replacements.table = {};
+	end
+--print( minetest.serialize( replacements.table )..'\n...are the replacements for '..tostring( village_type )..'.'); -- TODO
+--print( 'Village data: '..minetest.serialize( bpos )); -- TODO
 
 	local extranodes = {}
 	for _, pos in ipairs(bpos) do
