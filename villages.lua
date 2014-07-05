@@ -607,8 +607,9 @@ if( not( village_type )) then
   village_type = village_types[ ((vx+vz)%(#village_types) )+1 ]; -- TODO
 end
 village_type = 'medieval'; -- TODO!
+village.village_type = village_type;
 
-	local bpos = generate_bpos(vx, vz, vs, vh, pr_village, vnoise, village_type)
+	local bpos = generate_bpos( village, pr_village, vnoise)
 --print( 'RESULT of generate_bpos: '..minetest.serialize( bpos )); -- TODO
 --print( 'VILLAGE TYPE: '..tostring( village_type ));
 	--generate_walls(bpos, data, a, minp, maxp, vh, vx, vz, vs, vnoise)

@@ -629,7 +629,10 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 	elseif( top == c_dirt_snow  ) then top_node = 'default:dirt_with_snow';
 	else                               top_node = 'default:dirt_with_grass';
 	end
-	village.to_add_data = generate_village(village, minp, maxp, data, param2_data, a, village_noise, top_node)
+
+	for _, village in ipairs(villages) do
+		village.to_add_data = generate_village(village, minp, maxp, data, param2_data, a, village_noise, top_node)
+	end
 
 	vm:set_data(data)
 	vm:set_param2_data(param2_data)
@@ -673,7 +676,8 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 	end
 
 	-- now add those buildings which are .mts files and need to be placed by minetest.place_schematic(...)
-	place_village_buildings( to_add_data.bpos, to_add_data.replacements, a, pr );
+	place_village_buildings( village.to_add_data.bpos, village.to_add_data.replacements, a, pr );
+	end
 end
 
 minetest.register_on_generated(function(minp, maxp, seed)
