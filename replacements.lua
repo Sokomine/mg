@@ -13,6 +13,12 @@ nvillages.get_replacement_list = function( housetype, pr, dirt_with_grass_replac
    table.insert( replacements, {'default:dirt',            dirt_with_grass_replacement });
    table.insert( replacements, {'default:dirt_with_grass', dirt_with_grass_replacement });
 
+   -- nodes that accidently got into the schematics and are to be ignored
+   table.insert( replacements, {'junglegrass:shortest',    'air' });
+   table.insert( replacements, {'hydro:wild_peas',         'air' });
+   table.insert( replacements, {'ignore',                  'air' });
+   table.insert( replacements, {'moreblocks:slab_cobble',  'stairs:slab_cobble' });
+
    -- Taokis houses from structure i/o
    if( housetype == 'taoki' ) then  
 
