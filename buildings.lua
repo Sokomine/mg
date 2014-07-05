@@ -1,5 +1,5 @@
 
-village_types = { 'nore', 'logcabin', 'grasshut', 'medieval'};
+village_types = { 'nore', 'logcabin', 'grasshut', 'medieval', 'charachoal'};
 
 buildings = {
 
@@ -89,46 +89,78 @@ buildings = {
 -- the entries "avoid" and "typ" are not used here
 
 -- schematics from my villages mod
-	{scm="church_1",        yoff= 1, orients={0}, farming_plus=0, avoid='', typ='church',    weight={medieval=4}, pervillage=1},    
-	{scm="forge_1",         yoff= 1, orients={0}, farming_plus=0, avoid='', typ='forge',     weight={medieval=2}, pervillage=1},
-	{scm="mill_1",          yoff= 1, orients={0}, farming_plus=0, avoid='', typ='mill',      weight={medieval=2}, pervillage=1},
-	{scm="hut_1",           yoff= 1, orients={0}, farming_plus=0, avoid='', typ='hut',       weight={medieval=1}},
-	{scm="farm_full_1",     yoff= 1, orients={0}, farming_plus=0, avoid='', typ='farm_full', weight={medieval=1/4}},
-	{scm="farm_full_2",     yoff= 1, orients={0}, farming_plus=0, avoid='', typ='farm_full', weight={medieval=1/4}},
-	{scm="farm_full_3",     yoff= 1, orients={0}, farming_plus=0, avoid='', typ='farm_full', weight={medieval=1/4}},
-	{scm="farm_full_4",     yoff= 1, orients={0}, farming_plus=0, avoid='', typ='farm_full', weight={medieval=1/4}},
-	{scm="farm_full_5",     yoff= 1, orients={0}, farming_plus=0, avoid='', typ='farm_full', weight={medieval=1/4}},
-	{scm="farm_full_6",     yoff= 1, orients={0}, farming_plus=0, avoid='', typ='farm_full', weight={medieval=1/4}},
-	{scm="farm_tiny_1",     yoff= 1, orients={0}, farming_plus=1, avoid='', typ='farm_tiny', weight={medieval=1}},
-	{scm="farm_tiny_2",     yoff= 1, orients={0}, farming_plus=1, avoid='', typ='farm_tiny', weight={medieval=1}},
-	{scm="farm_tiny_3",     yoff= 1, orients={0}, farming_plus=1, avoid='', typ='farm_tiny', weight={medieval=1}},
-	{scm="farm_tiny_4",     yoff= 1, orients={0}, farming_plus=1, avoid='', typ='farm_tiny', weight={medieval=1}},
-	{scm="farm_tiny_5",     yoff= 1, orients={0}, farming_plus=1, avoid='', typ='farm_tiny', weight={medieval=1}},
-	{scm="farm_tiny_6",     yoff= 1, orients={0}, farming_plus=1, avoid='', typ='farm_tiny', weight={medieval=1}},
-	{scm="farm_tiny_7",     yoff= 1, orients={0}, farming_plus=1, avoid='', typ='farm_tiny', weight={medieval=1}},
-	{scm="taverne_1",       yoff= 1, orients={0}, farming_plus=1, avoid='', typ='tavern',    weight={medieval=1/2}},
-	{scm="taverne_2",       yoff= 1, orients={0}, farming_plus=0, avoid='', typ='tavern',    weight={medieval=1/2}},
-	{scm="taverne_3",       yoff= 1, orients={0}, farming_plus=0, avoid='', typ='tavern',    weight={medieval=1/2}},
-	{scm="taverne_4",       yoff= 1, orients={0}, farming_plus=0, avoid='', typ='tavern',    weight={medieval=1/2}},
-	{scm="well_1",          yoff= 1, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/6}},
-	{scm="well_2",          yoff= 1, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/6}},
-	{scm="well_3",          yoff= 1, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/6}},
-	{scm="well_4",          yoff= 1, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/6}},
-	{scm="well_5",          yoff= 1, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/6}},
-	{scm="well_6",          yoff= 1, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/6}},
-	{scm="well_7",          yoff= 1, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/6}},
-	{scm="well_8",          yoff= 1, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/6}},
+	{scm="church_1",        yoff= 0, orients={0}, farming_plus=0, avoid='', typ='church',    weight={medieval=4}, pervillage=1},    
+	{scm="forge_1",         yoff= 0, orients={0}, farming_plus=0, avoid='', typ='forge',     weight={medieval=2}, pervillage=1},
+	{scm="mill_1",          yoff= 0, orients={0}, farming_plus=0, avoid='', typ='mill',      weight={medieval=2}, pervillage=1},
+	{scm="hut_1",           yoff= 0, orients={0}, farming_plus=0, avoid='', typ='hut',       weight={medieval=1}},
+	{scm="farm_full_1",     yoff= 0, orients={0}, farming_plus=0, avoid='', typ='farm_full', weight={medieval=1/4}},
+	{scm="farm_full_2",     yoff= 0, orients={0}, farming_plus=0, avoid='', typ='farm_full', weight={medieval=1/4}},
+	{scm="farm_full_3",     yoff= 0, orients={0}, farming_plus=0, avoid='', typ='farm_full', weight={medieval=1/4}},
+	{scm="farm_full_4",     yoff= 0, orients={0}, farming_plus=0, avoid='', typ='farm_full', weight={medieval=1/4}},
+	{scm="farm_full_5",     yoff= 0, orients={0}, farming_plus=0, avoid='', typ='farm_full', weight={medieval=1/4}},
+	{scm="farm_full_6",     yoff= 0, orients={0}, farming_plus=0, avoid='', typ='farm_full', weight={medieval=1/4}},
+	{scm="farm_tiny_1",     yoff= 0, orients={0}, farming_plus=1, avoid='', typ='farm_tiny', weight={medieval=1}},
+	{scm="farm_tiny_2",     yoff= 0, orients={0}, farming_plus=1, avoid='', typ='farm_tiny', weight={medieval=1}},
+	{scm="farm_tiny_3",     yoff= 0, orients={0}, farming_plus=1, avoid='', typ='farm_tiny', weight={medieval=1}},
+	{scm="farm_tiny_4",     yoff= 0, orients={0}, farming_plus=1, avoid='', typ='farm_tiny', weight={medieval=1}},
+	{scm="farm_tiny_5",     yoff= 0, orients={0}, farming_plus=1, avoid='', typ='farm_tiny', weight={medieval=1}},
+	{scm="farm_tiny_6",     yoff= 0, orients={0}, farming_plus=1, avoid='', typ='farm_tiny', weight={medieval=1}},
+	{scm="farm_tiny_7",     yoff= 0, orients={0}, farming_plus=1, avoid='', typ='farm_tiny', weight={medieval=1}},
+	{scm="taverne_1",       yoff= 0, orients={0}, farming_plus=1, avoid='', typ='tavern',    weight={medieval=1/2}},
+	{scm="taverne_2",       yoff= 0, orients={0}, farming_plus=0, avoid='', typ='tavern',    weight={medieval=1/2}},
+	{scm="taverne_3",       yoff= 0, orients={0}, farming_plus=0, avoid='', typ='tavern',    weight={medieval=1/2}},
+	{scm="taverne_4",       yoff= 0, orients={0}, farming_plus=0, avoid='', typ='tavern',    weight={medieval=1/2}},
+	{scm="well_1",          yoff= 0, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/6}},
+	{scm="well_2",          yoff= 0, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/6}},
+	{scm="well_3",          yoff= 0, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/6}},
+	{scm="well_4",          yoff= 0, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/6}},
+	{scm="well_5",          yoff= 0, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/6}},
+	{scm="well_6",          yoff= 0, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/6}},
+	{scm="well_7",          yoff= -1, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/6}},
+	{scm="well_8",          yoff= -1, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/6}},
 
-	{scm="tree_place_1",    yoff= -1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=1/7}, pervillage=1},
-	{scm="tree_place_2",    yoff= -1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=1/7}, pervillage=1},
-	{scm="tree_place_3",    yoff= -1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=1/7}, pervillage=1},
-	{scm="tree_place_4",    yoff= -1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=1/7}, pervillage=1},
-	{scm="tree_place_5",    yoff= -1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=1/7}, pervillage=1},
-	{scm="tree_place_6",    yoff= -1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=1/7}, pervillage=1},
-	{scm="tree_place_7",    yoff= -1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=1/7}, pervillage=1},
-	{scm="tree_place_8",    yoff= -1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=3}, pervillage=1},
-	{scm="tree_place_9",    yoff= -1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=3}, pervillage=1},
-	{scm="tree_place_10",   yoff= -1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=3}, pervillage=1},
+	{scm="tree_place_1",    yoff= 1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=1/7}, pervillage=1},
+	{scm="tree_place_2",    yoff= 1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=1/7}, pervillage=1},
+	{scm="tree_place_3",    yoff= 1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=1/7}, pervillage=1},
+	{scm="tree_place_4",    yoff= 1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=1/7}, pervillage=1},
+	{scm="tree_place_5",    yoff= 1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=1/7}, pervillage=1},
+	{scm="tree_place_6",    yoff= 1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=1/7}, pervillage=1},
+	{scm="tree_place_7",    yoff= 1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=1/7}, pervillage=1},
+	{scm="tree_place_8",    yoff= 1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=3}, pervillage=1},
+	{scm="tree_place_9",    yoff= 1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=3}, pervillage=1},
+	{scm="tree_place_10",   yoff= 1, orients={0}, farming_plus=0, avoid='', typ='village_square', weight={medieval=3}, pervillage=1},
+
+	{scm="wagon_1",         yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='wagon',  weight={medieval=1/10}},
+	{scm="wagon_2",         yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='wagon',  weight={medieval=1/10}},
+	{scm="wagon_3",         yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='wagon',  weight={medieval=1/10}},
+	{scm="wagon_4",         yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='wagon',  weight={medieval=1/10}},
+	{scm="wagon_5",         yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='wagon',  weight={medieval=1/10}},
+	{scm="wagon_6",         yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='wagon',  weight={medieval=1/10}},
+	{scm="wagon_7",         yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='wagon',  weight={medieval=1/10}},
+	{scm="wagon_8",         yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='wagon',  weight={medieval=1/10}},
+	{scm="wagon_9",         yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='wagon',  weight={medieval=1/10}},
+	{scm="wagon_10",        yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='wagon',  weight={medieval=1/10}},
+	{scm="wagon_11",        yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='wagon',  weight={medieval=1/10}},
+	{scm="wagon_12",        yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='wagon',  weight={medieval=1/10}},
+
+	{scm="bench_1",         yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='bench',  weight={medieval=1/8}},
+	{scm="bench_2",         yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='bench',  weight={medieval=1/8}},
+	{scm="bench_3",         yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='bench',  weight={medieval=1/8}},
+	{scm="bench_4",         yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='bench',  weight={medieval=1/8}},
+
+	{scm="shed_1",          yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1}},
+	{scm="shed_2",          yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1}},
+	{scm="shed_3",          yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1}},
+	{scm="shed_5",          yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1}},
+	{scm="shed_6",          yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1}},
+	{scm="shed_7",          yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1}},
+	{scm="shed_8",          yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1}},
+	{scm="shed_9",          yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1}},
+	{scm="shed_10",         yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1}},
+
+	-- hut and hills for charachoal burners; perhaps they could live together with lumberjacks?
+	{scm="charachoal_hut",  yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='hut',  weight={charachoal=1}},
+	{scm="charachoal_hill", yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='hut',  weight={charachoal=1}},
 
    -- Houses from Taokis Structure I/O Mod (see https://forum.minetest.net/viewtopic.php?id=5524)
 	{scm="default_farm_large",     yoff= 1, orients={2}, farming_plus=0, avoid='', typ='farm_full', weight={taoki=1}},
@@ -144,6 +176,13 @@ buildings = {
    -- TODO: include houses from LadyMacBeth
 }
 
+
+-- the schematics for buildings of type 'farm_tiny' grow cotton; the farming_plus fruits would be far more fitting
+mg_fruit_list = {'carrot','potatoe','orange','rhubarb','strawberry','tomato','cotton'};
+-- is farming_plus available? If not, we can't use this
+if( not( minetest.get_modpath("farming_plus"))) then
+	mg_fruit_list = nil;
+end
 
 -- read the data files and fill in information like size and nodes that need on_construct to be called after placing
 mg_buildings_init = function()
@@ -166,9 +205,7 @@ mg_buildings_init = function()
 			buildings[ i ].ysize = res.size.y;
 			
 			-- some buildings may be rotated
-			if(  (buildings[ i ].orients and buildings[ i ].orients[1] == 1 )
-			  or (buildings[ i ].orients and buildings[ i ].orients[1] == 3 )
-			  or  res.rotated == 90
+			if(   res.rotated == 90
 			  or  res.rotated == 270 ) then
 
 				buildings[ i ].sizex = res.size.z;
@@ -180,6 +217,7 @@ mg_buildings_init = function()
 			end
 
 			-- we do need at least the list of nodenames which will need on_constr later on
+			buildings[ i ].rotated          = res.rotated;
 			buildings[ i ].nodenames        = res.nodenames;
 			buildings[ i ].on_constr        = res.on_constr;
 			buildings[ i ].after_place_node = res.after_place_node;
