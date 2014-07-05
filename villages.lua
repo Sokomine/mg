@@ -428,7 +428,7 @@ mg_get_local_dirt_with_grass = function( pos, size_x, size_z )
 
 	for i, p in ipairs( positions ) do
 		local n = minetest.get_node( p );
-		if( n and n ~= nil and n.name and n.name ~= 'air' ) then
+		if( n and n ~= nil and n.name and n.name ~= 'air' and n.name ~= 'ignore') then
 			if( not( types[ n.name ] )) then
 				types[ n.name ] = 1;
 			else
