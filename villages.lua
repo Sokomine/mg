@@ -404,7 +404,7 @@ end
 -- similar to generate_building, except that it uses minetest.place_schematic(..) instead of changing voxelmanip data;
 -- this has advantages for nodes that use facedir;
 -- the function is called AFTER the mapgen data has been written in init.lua
-place_village_buildings = function( bpos, replacements, voxelarea )
+place_village_buildings = function( bpos, replacements, voxelarea, dirt_with_grass_replacement )
 
 	local mts_path = minetest.get_modpath("mg").."/schems/";
 
@@ -447,6 +447,21 @@ place_village_buildings = function( bpos, replacements, voxelarea )
 				print( 'PLACED BUILDING '..tostring( binfo.scm )..' AT '..minetest.pos_to_string( pos )..'. Max. size: '..tostring( max_xz ));
 				-- force placement (we want entire buildings)
 				minetest.place_schematic( pos, mts_path..binfo.scm..'.mts', rotation, replacements, true);
+
+
+				-- add snowblocks on snow nodes
+				if( dirt_with_grass_replacement and dirt_with_grass_replacement == 'default:dirt_with_snow' ) then
+					local nodes = minetest.find_nodes_in_area( 
+							{ x=( pos.x       ), y=(pos.y - binfo.yoff              ), z=( pos.z )},
+							{ x=( pos.x+max_xz), y=(pos.y - binfo.yoff + binfo.ysize), z=( pos.z + max_xz )},
+							'default:dirt_with_snow');
+					for _, p in ipairs(nodes) do
+						local above = minetest.get_node( { x=p.x, y=p.y+1, z=p.z } );
+						if( above and above.name and above.name == 'air' ) then
+							minetest.set_node( {x=p.x, y=p.y+1, z=p.z}, { name='default:snow'} );
+						end
+					end
+				end	
 			end
 		end
 	end
