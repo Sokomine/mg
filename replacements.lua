@@ -13,11 +13,6 @@ nvillages.get_replacement_list = function( housetype, pr, dirt_with_grass_replac
    table.insert( replacements, {'default:dirt',            dirt_with_grass_replacement });
    table.insert( replacements, {'default:dirt_with_grass', dirt_with_grass_replacement });
 
-   -- nodes that accidently got into the schematics and are to be ignored
-   table.insert( replacements, {'junglegrass:shortest',    'air' });
-   table.insert( replacements, {'hydro:wild_peas',         'air' });
-   table.insert( replacements, {'moreblocks:slab_cobble',  'stairs:slab_cobble' });
-
    -- Taokis houses from structure i/o
    if( housetype == 'taoki' ) then  
 
@@ -96,7 +91,7 @@ nvillages.get_replacement_list = function( housetype, pr, dirt_with_grass_replac
 
    -- TODO: are there more possible types?
    -- wells can get the same replacements as the sourrounding village; they'll get a fitting roof that way
-   if( housetype ~= 'medieval' and housetype ~= 'well' and housetype ~= 'cottages') then
+   if( housetype ~= 'cottages' and housetype ~= 'well') then
       return {};
    end
 

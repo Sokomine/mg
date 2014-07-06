@@ -110,6 +110,7 @@ buildings = {
 	{scm="taverne_2",       yoff= 0, orients={0}, farming_plus=0, avoid='', typ='tavern',    weight={medieval=1/2}},
 	{scm="taverne_3",       yoff= 0, orients={0}, farming_plus=0, avoid='', typ='tavern',    weight={medieval=1/2}},
 	{scm="taverne_4",       yoff= 0, orients={0}, farming_plus=0, avoid='', typ='tavern',    weight={medieval=1/2}},
+
 	{scm="well_1",          yoff= 0, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/12}},
 	{scm="well_2",          yoff= 0, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/12}},
 	{scm="well_3",          yoff= 0, orients={0}, farming_plus=0, avoid='well', typ='well',  weight={medieval=1/12}},
@@ -164,7 +165,6 @@ buildings = {
 	{scm="charachoal_hut",  yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='hut',  weight={charachoal=1}},
 	{scm="charachoal_hill", yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='hut',  weight={charachoal=1}},
 
---[[
 	-- lumberjacks; they require the cottages mod
 	{scm="haus1",           yoff= 0, orients={4}, avoid='', typ='lumberjack', weight={lumberjack=1}},
 	{scm="haus2",           yoff= 0, orients={4}, avoid='', typ='lumberjack', weight={lumberjack=1}},
@@ -182,20 +182,8 @@ buildings = {
 	{scm="trader_clay_3",   yoff= 0, orients={4}, avoid='', typ='trader',     weight={claytrader=1}},
 	{scm="trader_clay_4",   yoff= 0, orients={4}, avoid='', typ='trader',     weight={claytrader=1}},
 	{scm="trader_clay_5",   yoff= 0, orients={4}, avoid='', typ='trader',     weight={claytrader=1}},
---]]
 
    -- Houses from Taokis Structure I/O Mod (see https://forum.minetest.net/viewtopic.php?id=5524)
---[[
-	{scm="default_farm_large",     yoff= 1, orients={2}, farming_plus=0, avoid='', typ='farm_full', weight={taoki=1}},
-	{scm="default_farm_small",     yoff= 1, orients={2}, farming_plus=1, avoid='', typ='farm_tiny', weight={taoki=2}},
-	{scm="default_house_large",    yoff= 0, orients={2}, farming_plus=0, avoid='', typ='house',     weight={taoki=1}},
-	{scm="default_house_medium",   yoff= 0, orients={2}, farming_plus=0, avoid='', typ='house',     weight={taoki=1}},
-	{scm="default_house_small",    yoff= 0, orients={2}, farming_plus=0, avoid='', typ='house',     weight={taoki=2}},
-	{scm="default_tower",          yoff= 0, orients={2}, farming_plus=0, avoid='', typ='tower',     weight={taoki=1/2}},
-	{scm="default_fountain_large", yoff= 0, orients={2}, farming_plus=0, avoid='well', typ='well',  weight={taoki=1/5}},
-	{scm="default_fountain_small", yoff= 0, orients={2}, farming_plus=0, avoid='well', typ='well',  weight={taoki=1/5}},
-	{scm="default_pole",           yoff= 0, orients={2}, farming_plus=0, avoid='',     typ='deko',  weight={taoki=1}},
---]]
 
 	{scm="default_town_farm",          yoff= -1, orients={1}, farming_plus=0, avoid='',     typ='house',  weight={taoki=1}},
 	{scm="default_town_house_large_1", yoff= -4, orients={1}, farming_plus=0, avoid='',     typ='house',  weight={taoki=1/4}},
