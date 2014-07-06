@@ -360,8 +360,8 @@ local function generate_building(pos, minp, maxp, data, param2_data, a, pr, extr
 		return;
 	end
 
-	if type(binfo.scm) == "string" then
-		scm = import_scm(binfo.scm, replacements)
+	if( type(binfo.scm) == "string" and type(binfo.scm_data_cache)=="string" )then
+		scm = minetest.deserialize( binfo.scm_data_cache ); --import_scm(binfo.scm, replacements)
 	else
 		scm = binfo.scm
 	end
@@ -374,12 +374,8 @@ local function generate_building(pos, minp, maxp, data, param2_data, a, pr, extr
 		ax, ay, az = pos.x+x, pos.y+y+binfo.yoff, pos.z+z
 		if (ax >= minp.x and ax <= maxp.x) and (ay >= minp.y and ay <= maxp.y) and (az >= minp.z and az <= maxp.z) then
 
-			-- in case the assumptions about the schematics dimension where wrong: fill up with red wool
-			if( not( scm[y+1] ) or not( scm[y+1][x+1] ) or not( scm[y+1][x+1][z+1] ))
-				then t = minetest.get_content_id("wool:red");
-			else
-				t = scm[y+1][x+1][z+1]
-			end
+			t = scm[y+1][x+1][z+1]
+
 			if type(t) == "table" then
 				if( t.node and t.node.name and replacements[ t.node.name ] ) then
 					t.node.name = replacements[ t.node.name ];
@@ -600,18 +596,11 @@ function generate_village(village, minp, maxp, data, param2_data, a, vnoise, dir
 	local village_type = village.village_type;
 	local seed = get_bseed({x=vx, z=vz})
 	local pr_village = PseudoRandom(seed)
-	local bpos = generate_bpos(village, pr_village, vnoise)
-
-if( not( village_type )) then
---  village_type = village_types[ math.random(1, #village_types )]; -- TODO
-  village_type = village_types[ ((vx+vz)%(#village_types) )+1 ]; -- TODO
-end
-village_type = 'medieval'; -- TODO!
-village.village_type = village_type;
-
 	local bpos = generate_bpos( village, pr_village, vnoise)
+
 --print( 'RESULT of generate_bpos: '..minetest.serialize( bpos )); -- TODO
---print( 'VILLAGE TYPE: '..tostring( village_type ));
+--print( 'VILLAGE TYPE: '..tostring( village.village_type ));
+
 	--generate_walls(bpos, data, a, minp, maxp, vh, vx, vz, vs, vnoise)
 	local pr = PseudoRandom(seed)
 	for _, g in ipairs(village.to_grow) do
@@ -621,20 +610,8 @@ village.village_type = village_type;
 	end
 
 	local p = PseudoRandom(seed);
-	local replacements = {};	
-	if( village_type == 'medieval' ) then
-		replacements = nvillages.get_replacement_table( 'cottages', p, dirt_with_grass_replacement );
-	elseif( village_type == 'nore' ) then
-		replacements = nvillages.get_replacement_table( 'nore',     p, dirt_with_grass_replacement );
-	elseif( village_type == 'grasshut' ) then
-		replacements = nvillages.get_replacement_table( 'grasshut', p, dirt_with_grass_replacement );
-	elseif( village_type == 'logcabin' ) then
-		replacements = nvillages.get_replacement_table( 'logcabin', p, dirt_with_grass_replacement );
-	end
+	local replacements = nvillages.get_replacement_table( village.village_type, p, dirt_with_grass_replacement );
 
---	if( not( replacements.list )) then
---		replacements.list = {};
---	end
 	if( not( replacements.table )) then
 		replacements.table = {};
 	end

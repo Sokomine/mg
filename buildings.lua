@@ -1,5 +1,5 @@
 
-village_types = { 'nore', 'logcabin', 'grasshut', 'medieval', 'charachoal'};
+--village_types = { 'nore', 'logcabin', 'grasshut', 'medieval', 'charachoal', 'taoki'};
 
 buildings = {
 
@@ -162,7 +162,28 @@ buildings = {
 	{scm="charachoal_hut",  yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='hut',  weight={charachoal=1}},
 	{scm="charachoal_hill", yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='hut',  weight={charachoal=1}},
 
+--[[
+	-- lumberjacks; they require the cottages mod
+	{scm="haus1",           yoff= 0, orients={4}, avoid='', typ='lumberjack', weight={lumberjack=1}},
+	{scm="haus2",           yoff= 0, orients={4}, avoid='', typ='lumberjack', weight={lumberjack=1}},
+	{scm="haus3",           yoff= 0, orients={4}, avoid='', typ='lumberjack', weight={lumberjack=1}},
+	{scm="haus4",           yoff= 0, orients={4}, avoid='', typ='lumberjack', weight={lumberjack=1}},
+	{scm="haus5",           yoff= 0, orients={4}, avoid='', typ='lumberjack', weight={lumberjack=1}},
+	{scm="haus6",           yoff= 0, orients={4}, avoid='', typ='lumberjack', weight={lumberjack=1}},
+	{scm="haus7",           yoff= 0, orients={4}, avoid='', typ='lumberjack', weight={lumberjack=1}},
+	{scm="haus8",           yoff= 0, orients={4}, avoid='', typ='lumberjack', weight={lumberjack=1}},
+	{scm="cow_trader_1",    yoff= 0, orients={4}, avoid='', typ='trader',     weight={lumberjack=1}},
+
+	-- clay traders depend on cottages as well
+	{scm="trader_clay_1",   yoff= 0, orients={4}, avoid='', typ='trader',     weight={claytrader=1}},
+	{scm="trader_clay_2",   yoff= 0, orients={4}, avoid='', typ='trader',     weight={claytrader=1}},
+	{scm="trader_clay_3",   yoff= 0, orients={4}, avoid='', typ='trader',     weight={claytrader=1}},
+	{scm="trader_clay_4",   yoff= 0, orients={4}, avoid='', typ='trader',     weight={claytrader=1}},
+	{scm="trader_clay_5",   yoff= 0, orients={4}, avoid='', typ='trader',     weight={claytrader=1}},
+--]]
+
    -- Houses from Taokis Structure I/O Mod (see https://forum.minetest.net/viewtopic.php?id=5524)
+--[[
 	{scm="default_farm_large",     yoff= 1, orients={2}, farming_plus=0, avoid='', typ='farm_full', weight={taoki=1}},
 	{scm="default_farm_small",     yoff= 1, orients={2}, farming_plus=1, avoid='', typ='farm_tiny', weight={taoki=2}},
 	{scm="default_house_large",    yoff= 0, orients={2}, farming_plus=0, avoid='', typ='house',     weight={taoki=1}},
@@ -172,6 +193,21 @@ buildings = {
 	{scm="default_fountain_large", yoff= 0, orients={2}, farming_plus=0, avoid='well', typ='well',  weight={taoki=1/5}},
 	{scm="default_fountain_small", yoff= 0, orients={2}, farming_plus=0, avoid='well', typ='well',  weight={taoki=1/5}},
 	{scm="default_pole",           yoff= 0, orients={2}, farming_plus=0, avoid='',     typ='deko',  weight={taoki=1}},
+--]]
+
+	{scm="default_town_farm",          yoff= -1, orients={1}, farming_plus=0, avoid='',     typ='house',  weight={taoki=1}},
+	{scm="default_town_house_large_1", yoff= -4, orients={1}, farming_plus=0, avoid='',     typ='house',  weight={taoki=1/4}},
+	{scm="default_town_house_large_2", yoff= -4, orients={1}, farming_plus=0, avoid='',     typ='house',  weight={taoki=1/4}},
+	{scm="default_town_house_medium",  yoff= -4, orients={1}, farming_plus=0, avoid='',     typ='house',  weight={taoki=1/2}},
+	{scm="default_town_house_small",   yoff= -4, orients={1}, farming_plus=0, avoid='',     typ='house',  weight={taoki=1}},
+	{scm="default_town_house_tiny_1",  yoff=  1, orients={1}, farming_plus=0, avoid='',     typ='house',  weight={taoki=1}},
+	{scm="default_town_house_tiny_2",  yoff=  1, orients={1}, farming_plus=0, avoid='',     typ='house',  weight={taoki=1}},
+	{scm="default_town_house_tiny_3",  yoff=  1, orients={1}, farming_plus=0, avoid='',     typ='house',  weight={taoki=1}},
+	{scm="default_town_park",          yoff=  1, orients={1}, farming_plus=0, avoid='',     typ='house',  weight={taoki=1}},
+	{scm="default_town_tower",         yoff=  1, orients={1}, farming_plus=0, avoid='',     typ='house',  weight={taoki=1/6}},
+	{scm="default_town_well",          yoff= -6, orients={1}, farming_plus=0, avoid='',     typ='house',  weight={taoki=1/4}},
+	{scm="default_town_fountain",      yoff=  1, orients={1}, farming_plus=0, avoid='',     typ='house',  weight={taoki=1/4}},
+--	{scm="default_town_hotel",         yoff= -1, orients={1}, farming_plus=0, avoid='',     typ='house',  weight={taoki=1/5}},
 
    -- TODO: include houses from LadyMacBeth
 }
@@ -184,6 +220,24 @@ if( not( minetest.get_modpath("farming_plus"))) then
 	mg_fruit_list = nil;
 end
 
+-- 'nore' and 'taoki' do not require any other mods; thus, they can be used in all worlds
+mg_village_types = { 'nore', 'taoki'};
+
+if(         minetest.get_modpath("cottages")) then
+	table.insert( mg_village_types, 'medieval' );
+	table.insert( mg_village_types, 'charachoal' );
+	table.insert( mg_village_types, 'lumberjack' );
+	table.insert( mg_village_types, 'claytrader' );
+
+	if( minetest.get_modpath("glasspanes")) then
+		table.insert( mg_village_types, 'logcabin' );
+	end
+end
+
+-- TODO: handle grasshut
+
+mg_village_types = {'medieval'};
+
 -- read the data files and fill in information like size and nodes that need on_construct to be called after placing
 mg_buildings_init = function()
 
@@ -194,9 +248,13 @@ mg_buildings_init = function()
 
 		-- read the size of the building
 		local res  = handle_schematics.analyze_mts_file( mts_path..buildings[ i ].scm ); 
+		-- alternatively, read the mts file
+		if( not( res )) then
+			res = import_scm( buildings[ i ].scm );
+		end
 
 		-- provided the file could be analyzed successfully
-		if( res and res.size.x ) then
+		if( res and res.size and res.size.x ) then
 			-- the file has to be placed with minetest.place_schematic(...)
 			buildings[ i ].is_mts = 1;
 
@@ -221,6 +279,21 @@ mg_buildings_init = function()
 			buildings[ i ].nodenames        = res.nodenames;
 			buildings[ i ].on_constr        = res.on_constr;
 			buildings[ i ].after_place_node = res.after_place_node;
+
+		-- determine size of worldedit schematics
+		elseif( res and #res and #res[1] and #res[1][1]) then
+
+			-- scm has the following structure: scm[y][x][z] 
+			buildings[ i ].ysize = #res;
+			buildings[ i ].sizex = #res[1];
+			buildings[ i ].sizez = #res[1][1];
+
+			buildings[ i ].is_mts = 0;
+
+			-- deep copy the schematics data here so that the file does not have to be read again
+			buildings[ i ].scm_data_cache = minetest.serialize( res );
+
+print('SIZE for building '..tostring( buildings[i].scm )..': '..minetest.serialize( {x=buildings[ i ].sizex, y= buildings[ i ].ysize, z= buildings[ i ].sizez} ));
 
 		-- missing data regarding building size - do not use this building for anything
 		elseif( not( buildings[ i ].sizex )    or not( buildings[ i ].sizez )
@@ -284,7 +357,7 @@ buildings["wall"] = {yoff = 1, ysize = 6, scm = wall}
 --end
 
 
-for j,v in ipairs( village_types ) do
+for j,v in ipairs( mg_village_types ) do
 	
 	local total_weight = 0
 	for _, i in ipairs(buildings) do
