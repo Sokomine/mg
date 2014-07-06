@@ -96,7 +96,7 @@ nvillages.get_replacement_list = function( housetype, pr, dirt_with_grass_replac
 
    -- TODO: are there more possible types?
    -- wells can get the same replacements as the sourrounding village; they'll get a fitting roof that way
-   if( housetype ~= 'medieval' and housetype ~= 'well') then
+   if( housetype ~= 'medieval' and housetype ~= 'well' and housetype ~= 'cottages') then
       return {};
    end
 
@@ -233,11 +233,13 @@ end
 nvillages.get_replacement_table = function( housetype, pr, dirt_with_grass_replacement )
 
 	local rtable = {};
+	local ids    = {};
 	local replacements = nvillages.get_replacement_list( housetype, pr, dirt_with_grass_replacement );
 	for i,v in ipairs( replacements ) do
 		if( v and #v == 2 ) then
 			rtable[ v[1] ] = v[2];
+			ids[ minetest.get_content_id( v[1] )] = minetest.get_content_id( v[2] );
 		end
 	end
-        return { table =  rtable, list = replacements };
+        return { table = rtable, list = replacements, ids = ids };
 end

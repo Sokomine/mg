@@ -57,6 +57,7 @@ function import_scm(scm)
 			ent.meta = {fields={}, inventory={}}
 		end
 		local paramtype2 = minetest.registered_nodes[ent.name] and minetest.registered_nodes[ent.name].paramtype2
+		-- unkown nodes are discarded here!
 		if ent.name == "mg:ignore" or not paramtype2 then
 				scm[ent.y][ent.x][ent.z] = c_ignore
 		elseif numk(ent.meta.fields) == 0 and numk(ent.meta.inventory) == 0 then

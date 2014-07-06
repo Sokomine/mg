@@ -360,8 +360,12 @@ local function generate_building(pos, minp, maxp, data, param2_data, a, pr, extr
 		return;
 	end
 
-	if( type(binfo.scm) == "string" and type(binfo.scm_data_cache)=="string" )then
+	if( type(binfo.scm) == "string" and binfo.scm_data_cache and type(binfo.scm_data_cache)=="string" )then
 		scm = minetest.deserialize( binfo.scm_data_cache ); --import_scm(binfo.scm, replacements)
+	-- at first time of spawning, all nodes ought to be defined; thus, we can cache the data
+	elseif( type( binfo.scm ) == "string" ) then
+		scm = import_scm( buildings[ pos.btype ].scm );
+		buildings[ pos.btype ].scm_data_cache = minetest.serialize( scm )
 	else
 		scm = binfo.scm
 	end
@@ -377,8 +381,11 @@ local function generate_building(pos, minp, maxp, data, param2_data, a, pr, extr
 			t = scm[y+1][x+1][z+1]
 
 			if type(t) == "table" then
-				if( t.node and t.node.name and replacements[ t.node.name ] ) then
-					t.node.name = replacements[ t.node.name ];
+				if( t.node and t.node.name and replacements.table[ t.node.name ] ) then
+					t.node.name    = replacements.table[ t.node.name ];
+				end
+				if( t.node and t.node.content and replacements.ids[ t.node.content ] ) then
+					t.node.content = replacements.ids[   t.node.content ];
 				end
 				if t.extranode then
 					table.insert(extranodes, {node = t.node, meta = t.meta, pos = {x = ax, y = ay, z = az}})
@@ -388,6 +395,10 @@ local function generate_building(pos, minp, maxp, data, param2_data, a, pr, extr
 				end
 			-- air and gravel
 			elseif t ~= c_ignore then
+
+				if( t and replacements.ids[ t ] ) then
+					t = replacements.ids[ t ];
+				end
 				data[a:index(ax, ay, az)] = t
 			end
 		end
@@ -621,7 +632,7 @@ function generate_village(village, minp, maxp, data, param2_data, a, vnoise, dir
 	local extranodes = {}
 	for _, pos in ipairs(bpos) do
 		-- replacements are in table format for mapgen-based building spawning
-		generate_building(pos, minp, maxp, data, param2_data, a, pr_village, extranodes, replacements.table )
+		generate_building(pos, minp, maxp, data, param2_data, a, pr_village, extranodes, replacements )
 	end
 	-- replacements are in list format for minetest.place_schematic(..) type spawning
 	return { extranodes = extranodes, bpos = bpos, replacements = replacements.list };

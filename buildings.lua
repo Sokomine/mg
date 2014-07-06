@@ -293,9 +293,10 @@ mg_buildings_init = function()
 			buildings[ i ].is_mts = 0;
 
 			-- deep copy the schematics data here so that the file does not have to be read again
-			buildings[ i ].scm_data_cache = minetest.serialize( res );
+			-- caching cannot be done here as not all nodes from other mods have been registered yet!
+			--buildings[ i ].scm_data_cache = minetest.serialize( res );
 
-print('SIZE for building '..tostring( buildings[i].scm )..': '..minetest.serialize( {x=buildings[ i ].sizex, y= buildings[ i ].ysize, z= buildings[ i ].sizez} ));
+--print('SIZE for building '..tostring( buildings[i].scm )..': '..minetest.serialize( {x=buildings[ i ].sizex, y= buildings[ i ].ysize, z= buildings[ i ].sizez} ));
 
 		-- missing data regarding building size - do not use this building for anything
 		elseif( not( buildings[ i ].sizex )    or not( buildings[ i ].sizez )
