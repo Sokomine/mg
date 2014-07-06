@@ -157,6 +157,8 @@ buildings = {
 	{scm="shed_8",          yoff= 0, orients={0,1,3}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
 	{scm="shed_9",          yoff= 0, orients={0,1,3}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
 	{scm="shed_10",         yoff= 0, orients={0,1,3}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
+	{scm="shed_11",         yoff= 0, orients={0,1,3}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
+	{scm="shed_12",         yoff= 0, orients={0,1,3}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
 
 	-- hut and hills for charachoal burners; perhaps they could live together with lumberjacks?
 	{scm="charachoal_hut",  yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='hut',  weight={charachoal=1}},
