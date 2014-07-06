@@ -199,6 +199,7 @@ buildings = {
 	{scm="default_town_tower",         yoff=  1, orients={1}, farming_plus=0, avoid='',     typ='house',  weight={taoki=1/6}},
 	{scm="default_town_well",          yoff= -6, orients={1}, farming_plus=0, avoid='',     typ='house',  weight={taoki=1/4}},
 	{scm="default_town_fountain",      yoff=  1, orients={1}, farming_plus=0, avoid='',     typ='house',  weight={taoki=1/4}},
+	-- the hotel seems to be only the middle section of the building; it's build for another spawning algorithm
 --	{scm="default_town_hotel",         yoff= -1, orients={1}, farming_plus=0, avoid='',     typ='house',  weight={taoki=1/5}},
 
    -- TODO: include houses from LadyMacBeth
@@ -228,7 +229,7 @@ end
 
 -- TODO: handle grasshut
 
-mg_village_types = {'medieval'};
+mg_village_types = {'taoki'};
 
 -- read the data files and fill in information like size and nodes that need on_construct to be called after placing
 mg_buildings_init = function()
