@@ -464,117 +464,133 @@ place_village_buildings = function( bpos, replacements, voxelarea, pr )
 
 		local binfo = buildings[pos.btype];
 
-		-- this function is only responsible for files that are in .mts format
-		if( binfo.is_mts == 1 ) then
+		-- We need to check all 8 corners of the building.
+		-- This will only work for buildings that are smaller than chunk size (relevant here: about 111 nodes)
+		-- The function only spawns buildings which are at least partly contained in this chunk/voxelarea.
+		if( voxelarea
+		   and ( voxelarea:contains( pos.x,              pos.y - binfo.yoff,               pos.z )
+		      or voxelarea:contains( pos.x + pos.bsizex, pos.y - binfo.yoff,               pos.z )
+		      or voxelarea:contains( pos.x,              pos.y - binfo.yoff,               pos.z + pos.bsizez )
+		      or voxelarea:contains( pos.x + pos.bsizex, pos.y - binfo.yoff,               pos.z + pos.bsizez )
+		      or voxelarea:contains( pos.x,              pos.y - binfo.yoff + binfo.ysize, pos.z )
+		      or voxelarea:contains( pos.x + pos.bsizex, pos.y - binfo.yoff + binfo.ysize, pos.z )
+		      or voxelarea:contains( pos.x,              pos.y - binfo.yoff + binfo.ysize, pos.z + pos.bsizez )
+		      or voxelarea:contains( pos.x + pos.bsizex, pos.y - binfo.yoff + binfo.ysize, pos.z + pos.bsizez ) )) then
 
-			-- We need to check all 8 corners of the building.
-			-- This will only work for buildings that are smaller than chunk size (relevant here: about 111 nodes)
-			-- The function only spawns buildings which are at least partly contained in this chunk/voxelarea.
-			if( voxelarea
-			   and ( voxelarea:contains( pos.x,              pos.y - binfo.yoff,               pos.z )
-			      or voxelarea:contains( pos.x + pos.bsizex, pos.y - binfo.yoff,               pos.z )
-			      or voxelarea:contains( pos.x,              pos.y - binfo.yoff,               pos.z + pos.bsizez )
-			      or voxelarea:contains( pos.x + pos.bsizex, pos.y - binfo.yoff,               pos.z + pos.bsizez )
-			      or voxelarea:contains( pos.x,              pos.y - binfo.yoff + binfo.ysize, pos.z )
-			      or voxelarea:contains( pos.x + pos.bsizex, pos.y - binfo.yoff + binfo.ysize, pos.z )
-			      or voxelarea:contains( pos.x,              pos.y - binfo.yoff + binfo.ysize, pos.z + pos.bsizez )
-			      or voxelarea:contains( pos.x + pos.bsizex, pos.y - binfo.yoff + binfo.ysize, pos.z + pos.bsizez ) )) then
-
-				-- translate rotation
-				local rotation = 0;
-				if(     pos.brotate == 1 ) then
-					rotation = 90;
-				elseif( pos.brotate == 2 ) then
-					rotation = 180;
-				elseif( pos.brotate == 3 ) then
-					rotation = 270;
-				else
-					rotation = 0;
-				end
-				if( binfo.rotated ) then
-					rotation = (rotation + binfo.rotated ) % 360;
-				end
-	
-				local start_pos = { x=( pos.x           ), y=(pos.y + binfo.yoff              ), z=( pos.z )};
-				local end_pos   = { x=( pos.x+pos.bsizex), y=(pos.y + binfo.yoff + binfo.ysize), z=( pos.z + pos.bsizez )};
-
-				-- copy the replacement list so that there are no duplicate entries
-				local new_replacements = {};
-				for i, repl in ipairs( replacements ) do	
-					new_replacements[ i ] = repl;
-				end	
-
-				local new_fruit = '';
-				-- they don't all grow cotton; farming_plus fruits are far more intresting!
-				if( binfo.farming_plus and binfo.farming_plus == 1 and mg_fruit_list ) then
- 					new_fruit = mg_fruit_list[ pr:next( 1, #mg_fruit_list )];
-
-					for i=1,8 do
-						-- farming_plus plants sometimes come in 3 or 4 variants, but not in 8 as cotton does
-						if(     minetest.registered_nodes[ 'farming_plus:'..new_fruit..'_'..i ]) then
-							table.insert( new_replacements, {"farming:cotton_"..i,  'farming_plus:'..new_fruit..'_'..i });
-					
-						-- "surplus" cotton variants will be replaced with the full grown fruit
-						elseif( minetest.registered_nodes[ 'farming_plus:'..new_fruit ]) then
-							table.insert( new_replacements, {"farming:cotton_"..i,  'farming_plus:'..new_fruit });
-
-						-- and plants from farming: are supported as well
-						elseif( minetest.registered_nodes[ 'farming:'..new_fruit..'_'..i ]) then
-							table.insert( new_replacements, {"farming:cotton_"..i,  'farming:'..new_fruit..'_'..i });
-
-						elseif( minetest.registered_nodes[ 'farming:'..new_fruit ]) then
-							table.insert( new_replacements, {"farming:cotton_"..i,  'farming:'..new_fruit });
-						end
-					end
-				end
-
-				-- check sourrounding nodes for information on which grass type we really ought to use
-				local dirt_with_grass_replacement = mg_get_local_dirt_with_grass( pos, bsizex, bsizez ); 
-
-				-- avoid duplicate entries
-				for i, repl in ipairs( new_replacements ) do
-					if( repl and #repl and #repl>1 and (repl[1]=='default:dirt_with_grass' or repl[1]=='default:dirt' )) then
-						new_replacements[ i ][ 2 ] = dirt_with_grass_replacement;
-					end
-				end
-
-
-				print( 'PLACED BUILDING '..tostring( binfo.scm )..' AT '..minetest.pos_to_string( pos )..'. Max. size: '..tostring( max_xz )..' grows: '..tostring(fruit));
-				-- force placement (we want entire buildings)
-				minetest.place_schematic( start_pos, mts_path..binfo.scm..'.mts', tostring( rotation ), new_replacements, true);
-
-				-- TODO: snow placement needs to be done for we-files as well
-				-- TODO: add snow on roofs and roof-slabs and stairs
-
-				-- add snowblocks on snow nodes
-				if( dirt_with_grass_replacement and dirt_with_grass_replacement == 'default:dirt_with_snow' ) then
-					local nodes = minetest.find_nodes_in_area( start_pos, end_pos, 'default:dirt_with_snow');
-					for _, p in ipairs(nodes) do
-						local above = minetest.get_node( { x=p.x, y=p.y+1, z=p.z } );
-						if( above and above.name and above.name == 'air' ) then
-							minetest.set_node( {x=p.x, y=p.y+1, z=p.z}, { name='default:snow'} );
-						end
-					end
-				end	
-
-				-- call on_construct for all the nodes that require it (i.e. furnaces)
-				for i, v in ipairs( binfo.on_constr ) do
-
-					-- there are only very few nodes which need this special treatment
-					local nodes = minetest.find_nodes_in_area( start_pos, end_pos, v);
-
-					for _, p in ipairs( nodes ) do
-						minetest.registered_nodes[ v ].on_construct( p );
-					end
-				end
-
-				-- note: after_place_node is not handled here because we do not have a player at hand that could be used for it
-	
-				-- TODO: fill chests etc.
-			end
+			mg_village_place_one_schematic( bpos, replacements, pr, pos, mts_path );
 		end
 	end
 end
+
+
+-- also adds a snow layer for buildings spawned from .we files
+mg_village_place_one_schematic = function( bos, replacements, pr, pos, mts_path )
+
+	local binfo = buildings[pos.btype];
+
+	local start_pos = { x=( pos.x           ), y=(pos.y + binfo.yoff              ), z=( pos.z )};
+	local end_pos   = { x=( pos.x+pos.bsizex), y=(pos.y + binfo.yoff + binfo.ysize), z=( pos.z + pos.bsizez )};
+
+	-- check sourrounding nodes for information on which grass type we really ought to use
+	local dirt_with_grass_replacement = mg_get_local_dirt_with_grass( pos, bsizex, bsizez ); 
+
+	-- this function is only responsible for files that are in .mts format
+	if( binfo.is_mts == 1 ) then
+		-- translate rotation
+		local rotation = 0;
+		if(     pos.brotate == 1 ) then
+			rotation = 90;
+		elseif( pos.brotate == 2 ) then
+			rotation = 180;
+		elseif( pos.brotate == 3 ) then
+			rotation = 270;
+		else
+			rotation = 0;
+		end
+		if( binfo.rotated ) then
+			rotation = (rotation + binfo.rotated ) % 360;
+		end
+
+		-- copy the replacement list so that there are no duplicate entries
+		local new_replacements = {};
+		for i, repl in ipairs( replacements ) do	
+			new_replacements[ i ] = repl;
+		end	
+
+		local new_fruit = '';
+		-- they don't all grow cotton; farming_plus fruits are far more intresting!
+		if( binfo.farming_plus and binfo.farming_plus == 1 and mg_fruit_list ) then
+ 			new_fruit = mg_fruit_list[ pr:next( 1, #mg_fruit_list )];
+
+			for i=1,8 do
+				-- farming_plus plants sometimes come in 3 or 4 variants, but not in 8 as cotton does
+				if(     minetest.registered_nodes[ 'farming_plus:'..new_fruit..'_'..i ]) then
+					table.insert( new_replacements, {"farming:cotton_"..i,  'farming_plus:'..new_fruit..'_'..i });
+			
+				-- "surplus" cotton variants will be replaced with the full grown fruit
+				elseif( minetest.registered_nodes[ 'farming_plus:'..new_fruit ]) then
+					table.insert( new_replacements, {"farming:cotton_"..i,  'farming_plus:'..new_fruit });
+
+				-- and plants from farming: are supported as well
+				elseif( minetest.registered_nodes[ 'farming:'..new_fruit..'_'..i ]) then
+					table.insert( new_replacements, {"farming:cotton_"..i,  'farming:'..new_fruit..'_'..i });
+
+				elseif( minetest.registered_nodes[ 'farming:'..new_fruit ]) then
+					table.insert( new_replacements, {"farming:cotton_"..i,  'farming:'..new_fruit });
+				end
+			end
+		end
+
+		-- avoid duplicate entries
+		for i, repl in ipairs( new_replacements ) do
+			if( repl and #repl and #repl>1 and (repl[1]=='default:dirt_with_grass' or repl[1]=='default:dirt' )) then
+				new_replacements[ i ][ 2 ] = dirt_with_grass_replacement;
+			end
+		end
+
+
+--		print( 'PLACED BUILDING '..tostring( binfo.scm )..' AT '..minetest.pos_to_string( pos )..'. Max. size: '..tostring( max_xz )..' grows: '..tostring(fruit));
+		-- force placement (we want entire buildings)
+		minetest.place_schematic( start_pos, mts_path..binfo.scm..'.mts', tostring( rotation ), new_replacements, true);
+
+		-- TODO: add snow on roofs and roof-slabs and stairs
+
+		-- call on_construct for all the nodes that require it (i.e. furnaces)
+		for i, v in ipairs( binfo.on_constr ) do
+
+			-- there are only very few nodes which need this special treatment
+			local nodes = minetest.find_nodes_in_area( start_pos, end_pos, v);
+
+			for _, p in ipairs( nodes ) do
+				minetest.registered_nodes[ v ].on_construct( p );
+			end
+		end
+
+		-- note: after_place_node is not handled here because we do not have a player at hand that could be used for it
+
+		-- TODO: fill chests etc.
+	end
+
+	-- add snowblocks on snow nodes; this needs to be done for .mts and .we files alike
+	if( dirt_with_grass_replacement and dirt_with_grass_replacement == 'default:dirt_with_snow' ) then
+
+		local nodes = minetest.find_nodes_in_area( start_pos, end_pos, {'default:dirt','default:dirt_with_grass','default:dirt_with_snow','mg:dirt_with_dry_grass'});
+		for _, p in ipairs(nodes) do
+			local above = minetest.get_node( { x=p.x, y=p.y+1, z=p.z } );
+			if( above and above.name and above.name == 'air' ) then
+				minetest.set_node( {x=p.x, y=p.y+1, z=p.z}, { name='default:snow'} );
+			end
+			-- adjust the surface grass for .we files
+			if( not( binfo.is_mts == 1 )) then
+				local n     = minetest.get_node( p );
+				if( n and n.name and n.name ~= dirt_with_grass_replacement ) then
+					minetest.set_node( p, { name = dirt_with_grass_replacement } );
+				end
+			end
+		end
+	end	
+end
+
 
 
 
