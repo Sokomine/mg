@@ -144,27 +144,28 @@ buildings = {
 	{scm="wagon_11",        yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='wagon',  weight={medieval=1/12}},
 	{scm="wagon_12",        yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='wagon',  weight={medieval=1/12}},
 
-	{scm="bench_1",         yoff= 0, orients={0,1,3}, farming_plus=0, avoid='', typ='bench',  weight={medieval=1/12}},
-	{scm="bench_2",         yoff= 0, orients={0,1,3}, farming_plus=0, avoid='', typ='bench',  weight={medieval=1/12}},
-	{scm="bench_3",         yoff= 0, orients={0,1,3}, farming_plus=0, avoid='', typ='bench',  weight={medieval=1/12}},
-	{scm="bench_4",         yoff= 0, orients={0,1,3}, farming_plus=0, avoid='', typ='bench',  weight={medieval=1/12}},
+	{scm="bench_1",         yoff= 0, orients={0,1,2}, farming_plus=0, avoid='', typ='bench',  weight={medieval=1/12}},
+	{scm="bench_2",         yoff= 0, orients={0,1,2}, farming_plus=0, avoid='', typ='bench',  weight={medieval=1/12}},
+	{scm="bench_3",         yoff= 0, orients={0,1,2}, farming_plus=0, avoid='', typ='bench',  weight={medieval=1/12}},
+	{scm="bench_4",         yoff= 0, orients={0,1,2}, farming_plus=0, avoid='', typ='bench',  weight={medieval=1/12}},
 
-	{scm="shed_1",          yoff= 0, orients={0,1,3}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
-	{scm="shed_2",          yoff= 0, orients={0,1,3}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
-	{scm="shed_3",          yoff= 0, orients={0,1,3}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
-	{scm="shed_5",          yoff= 0, orients={0,1,3}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
-	{scm="shed_6",          yoff= 0, orients={0,1,3}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
-	{scm="shed_7",          yoff= 0, orients={0,1,3}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
-	{scm="shed_8",          yoff= 0, orients={0,1,3}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
-	{scm="shed_9",          yoff= 0, orients={0,1,3}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
-	{scm="shed_10",         yoff= 0, orients={0,1,3}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
-	{scm="shed_11",         yoff= 0, orients={0,1,3}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
-	{scm="shed_12",         yoff= 0, orients={0,1,3}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
+	{scm="shed_1",          yoff= 0, orients={0,1,2}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
+	{scm="shed_2",          yoff= 0, orients={0,1,2}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
+	{scm="shed_3",          yoff= 0, orients={0,1,2}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
+	{scm="shed_5",          yoff= 0, orients={0,1,2}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
+	{scm="shed_6",          yoff= 0, orients={0,1,2}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
+	{scm="shed_7",          yoff= 0, orients={0,1,2}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
+	{scm="shed_8",          yoff= 0, orients={0,1,2}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
+	{scm="shed_9",          yoff= 0, orients={0,1,2}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
+	{scm="shed_10",         yoff= 0, orients={0,1,2}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
+	{scm="shed_11",         yoff= 0, orients={0,1,2}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
+	{scm="shed_12",         yoff= 0, orients={0,1,2}, farming_plus=0, avoid='', typ='shed',  weight={medieval=1/10}},
 
 	-- hut and hills for charachoal burners; perhaps they could live together with lumberjacks?
-	{scm="charachoal_hut",  yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='hut',  weight={charachoal=1}},
+	{scm="charachoal_hut",  yoff= 0, orients={0,1,2}, farming_plus=0, avoid='', typ='hut',  weight={charachoal=1}},
 	{scm="charachoal_hill", yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='hut',  weight={charachoal=1}},
 
+--[[
 	-- lumberjacks; they require the cottages mod
 	{scm="haus1",           yoff= 0, orients={4}, avoid='', typ='lumberjack', weight={lumberjack=1}},
 	{scm="haus2",           yoff= 0, orients={4}, avoid='', typ='lumberjack', weight={lumberjack=1}},
@@ -182,6 +183,7 @@ buildings = {
 	{scm="trader_clay_3",   yoff= 0, orients={4}, avoid='', typ='trader',     weight={claytrader=1}},
 	{scm="trader_clay_4",   yoff= 0, orients={4}, avoid='', typ='trader',     weight={claytrader=1}},
 	{scm="trader_clay_5",   yoff= 0, orients={4}, avoid='', typ='trader',     weight={claytrader=1}},
+--]]
 
    -- Houses from Taokis Structure I/O Mod (see https://forum.minetest.net/viewtopic.php?id=5524)
 
