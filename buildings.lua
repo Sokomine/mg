@@ -161,7 +161,25 @@ buildings = {
 	-- the hotel seems to be only the middle section of the building; it's build for another spawning algorithm
 --	{scm="default_town_hotel",         yoff= -1, orients={1}, farming_plus=0, avoid='',     typ='house',  weight={taoki=1/5}},
 
-   -- TODO: include houses from LadyMacBeth
+   -- include houses from LadyMacBeth, originally created for Mauvebics mm2 modpack; the houses seem to be in canadian village style
+	{scm="c_bank",                     yoff=  1, orients={2}, farming_plus=0, avoid='',     typ='ladymacbeth',  weight={canadian=1}},
+	{scm="c_bank2",                    yoff=  1, orients={0}, farming_plus=0, avoid='',     typ='ladymacbeth',  weight={canadian=1}},
+	{scm="c_bar",                      yoff=  1, orients={0}, farming_plus=0, avoid='',     typ='ladymacbeth',  weight={canadian=1}},
+	{scm="c_hotel",                    yoff=  1, orients={0}, farming_plus=0, avoid='',     typ='ladymacbeth',  weight={canadian=1}},
+	{scm="c_postoffice",               yoff=  1, orients={0}, farming_plus=0, avoid='',     typ='ladymacbeth',  weight={canadian=1}, pervillage=1},
+	{scm="c_bordello",                 yoff=  1, orients={0}, farming_plus=0, avoid='',     typ='ladymacbeth',  weight={canadian=1}, pervillage=1},
+	{scm="c_library",                  yoff=  1, orients={0}, farming_plus=0, avoid='',     typ='ladymacbeth',  weight={canadian=1}, pervillage=1},
+
+	{scm="g_observatory",              yoff=  1, orients={0}, farming_plus=0, avoid='',     typ='ladymacbeth',  weight={canadian=1}, pervillage=1},
+	{scm="g_court",                    yoff=  1, orients={0}, farming_plus=0, avoid='',     typ='ladymacbeth',  weight={canadian=1}, pervillage=1},
+	{scm="g_prefecture",               yoff=  1, orients={0}, farming_plus=0, avoid='',     typ='ladymacbeth',  weight={canadian=1}, pervillage=1},
+	{scm="g_townhall",                 yoff=  1, orients={0}, farming_plus=0, avoid='',     typ='ladymacbeth',  weight={canadian=1}, pervillage=1},
+	{scm="g_park2",                    yoff= -1, orients={0}, farming_plus=0, avoid='',     typ='ladymacbeth',  weight={canadian=2},},
+
+	{scm="r_apartments",               yoff=  1, orients={0}, farming_plus=0, avoid='',     typ='ladymacbeth',  weight={canadian=4},},
+	{scm="r_rowhouses",                yoff=  1, orients={2}, farming_plus=0, avoid='',     typ='ladymacbeth',  weight={canadian=4},},
+	{scm="r_manorhouse",               yoff=  1, orients={0}, farming_plus=0, avoid='',     typ='ladymacbeth',  weight={canadian=3},},
+	{scm="r_triplex",                  yoff=  1, orients={0}, farming_plus=0, avoid='',     typ='ladymacbeth',  weight={canadian=3},},
 }
 
 
@@ -184,6 +202,10 @@ if(         minetest.get_modpath("cottages")) then
 	if( minetest.get_modpath("glasspanes")) then
 		table.insert( mg_village_types, 'logcabin' );
 	end
+end
+
+if( minetest.get_modpath( 'hdb' ) and minetest.get_modpath( 'nbu' )) then
+	table.insert( mg_village_types, 'canadian' );
 end
 
 -- TODO: handle grasshut
@@ -243,8 +265,6 @@ mg_buildings_init = function()
 			-- deep copy the schematics data here so that the file does not have to be read again
 			-- caching cannot be done here as not all nodes from other mods have been registered yet!
 			--buildings[ i ].scm_data_cache = minetest.serialize( res );
-
---print('SIZE for building '..tostring( buildings[i].scm )..': '..minetest.serialize( {x=buildings[ i ].sizex, y= buildings[ i ].ysize, z= buildings[ i ].sizez} ));
 
 		-- missing data regarding building size - do not use this building for anything
 		elseif( not( buildings[ i ].sizex )    or not( buildings[ i ].sizez )

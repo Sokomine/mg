@@ -8,16 +8,45 @@ end
 
 function import_scm(scm)
 	local c_ignore = minetest.get_content_id("ignore")
+
+	-- this table will contain the nodes read
+	local nodes = {}
+
+--[[
+	-- .bld file support did not work very well
+
+	-- first check if it's a .bld file from mauvebics mm2 modpack; code taken from said modpack from mauvebic and adjusted
+	local bldfile, bld_err = io.open(minetest.get_modpath('mg')..'/schems/'..scm..'.bld', "r");
+	if( bldfile ) then
+		local line = bldfile:read("*line")
+		while line ~= nil do
+			local nodename, coords,param2 = unpack(line:split("~"))
+			if not string.find(nodename,'mbbase:') then
+				local p = {}
+				p.x, p.y, p.z = string.match(coords, "^([%d.-]+)[, ] *([%d.-]+)[, ] *([%d.-]+)$")
+				if p.x and p.y and p.z then
+					table.insert( nodes, {x = tonumber(math.ceil(p.x)),y= tonumber(math.ceil(p.y)),z = tonumber(math.ceil(p.z)),name=nodename,param2=param2})
+				end
+			end
+			line = bldfile:read("*line")
+		end
+		io.close(bldfile)
+	end
+--]]
+
+	-- check if it is a worldedit file
+	-- (no idea why reading that is done in such a complicated way; a simple deserialize and iteration over all nodes ought to do as well)
 	local f, err = io.open(minetest.get_modpath("mg").."/schems/"..scm..".we", "r")
 	if not f then
 		error("Could not open schematic '" .. scm .. ".we': " .. err)
+		return {};
 	end
+
 	value = f:read("*a")
 	f:close()
 	value = value:gsub("return%s*{", "", 1):gsub("}%s*$", "", 1)
 	local escaped = value:gsub("\\\\", "@@"):gsub("\\\"", "@@"):gsub("(\"[^\"]*\")", function(s) return string.rep("@", #s) end)
 	local startpos, startpos1, endpos = 1, 1
-	local nodes = {}
 	while true do
 		startpos, endpos = escaped:find("},%s*{", startpos)
 		if not startpos then
@@ -28,6 +57,8 @@ function import_scm(scm)
 		startpos, startpos1 = endpos, endpos
 	end
 	table.insert(nodes, minetest.deserialize("return " .. value:sub(startpos1)))
+
+
 	scm = {}
 	local maxx, maxy, maxz = -1, -1, -1
 	for i = 1, #nodes do
