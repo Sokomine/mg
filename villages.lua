@@ -456,7 +456,7 @@ end
 -- this has advantages for nodes that use facedir;
 -- the function is called AFTER the mapgen data has been written in init.lua
 -- pr is used to determine which fruit to grow on small farms
-place_village_buildings = function( bpos, replacements, voxelarea, pr )
+mg_village_place_schematics = function( bpos, replacements, voxelarea, pr )
 
 	local mts_path = minetest.get_modpath("mg").."/schems/";
 
@@ -477,14 +477,25 @@ place_village_buildings = function( bpos, replacements, voxelarea, pr )
 		      or voxelarea:contains( pos.x,              pos.y - binfo.yoff + binfo.ysize, pos.z + pos.bsizez )
 		      or voxelarea:contains( pos.x + pos.bsizex, pos.y - binfo.yoff + binfo.ysize, pos.z + pos.bsizez ) )) then
 
+			-- that function places schematics, adds snow where needed and stores information about the fruit
+			-- and the grass type used directly in the pos/bpos data structure
 			mg_village_place_one_schematic( bpos, replacements, pr, pos, mts_path );
 		end
 	end
+	--print('VILLAGE DATA: '..minetest.serialize( bpos ));
 end
 
 
 -- also adds a snow layer for buildings spawned from .we files
-mg_village_place_one_schematic = function( bos, replacements, pr, pos, mts_path )
+mg_village_place_one_schematic = function( bpos, replacements, pr, pos, mts_path )
+
+	-- just for the record: count how many times this building has been placed already;
+	-- multiple placements are commen at chunk boundaries (may be up to 8 placements)
+	if( not( pos.count_placed )) then
+		pos.count_placed = 1;
+	else
+		pos.count_placed = pos.count_placed + 1;
+	end
 
 	local binfo = buildings[pos.btype];
 
@@ -521,6 +532,9 @@ mg_village_place_one_schematic = function( bos, replacements, pr, pos, mts_path 
 		-- they don't all grow cotton; farming_plus fruits are far more intresting!
 		if( binfo.farming_plus and binfo.farming_plus == 1 and mg_fruit_list ) then
  			new_fruit = mg_fruit_list[ pr:next( 1, #mg_fruit_list )];
+
+			-- save the choosen fruit replacement in the village data
+			pos.fruit = new_fruit;					
 
 			for i=1,8 do
 				-- farming_plus plants sometimes come in 3 or 4 variants, but not in 8 as cotton does
@@ -567,8 +581,6 @@ mg_village_place_one_schematic = function( bos, replacements, pr, pos, mts_path 
 		end
 
 		-- note: after_place_node is not handled here because we do not have a player at hand that could be used for it
-
-		-- TODO: fill chests etc.
 	end
 
 	-- add snowblocks on snow nodes; this needs to be done for .mts and .we files alike
@@ -589,6 +601,11 @@ mg_village_place_one_schematic = function( bos, replacements, pr, pos, mts_path 
 			end
 		end
 	end	
+
+	-- save the dirt_with_grass_replacement choosen for this particular building in the village data
+	pos.grass_type = dirt_with_grass_replacement;
+
+	-- TODO: fill chests etc.
 end
 
 

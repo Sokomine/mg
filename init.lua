@@ -678,7 +678,7 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 	end
 
 	-- now add those buildings which are .mts files and need to be placed by minetest.place_schematic(...)
-	place_village_buildings( village.to_add_data.bpos, village.to_add_data.replacements, a, pr );
+	mg_village_place_schematics( village.to_add_data.bpos, village.to_add_data.replacements, a, pr );
 	end
 end
 
