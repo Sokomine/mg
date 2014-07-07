@@ -345,7 +345,7 @@ local function generate_bpos(village, pr, vnoise)
 	generate_road(village, l, pr, FIRST_ROADSIZE, rx, rz, 1, 0, vnoise)
 	i = 1
 	while i < calls.index do
-		generate_road(unpack(calls[i])) -- TODO?
+		generate_road(unpack(calls[i]))
 		i = i+1
 	end
 	return l
@@ -625,9 +625,6 @@ function generate_village(village, minp, maxp, data, param2_data, a, vnoise, dir
 	local pr_village = PseudoRandom(seed)
 	local bpos = generate_bpos( village, pr_village, vnoise)
 
---print( 'RESULT of generate_bpos: '..minetest.serialize( bpos )); -- TODO
---print( 'VILLAGE TYPE: '..tostring( village.village_type ));
-
 	--generate_walls(bpos, data, a, minp, maxp, vh, vx, vz, vs, vnoise)
 	local pr = PseudoRandom(seed)
 	for _, g in ipairs(village.to_grow) do
@@ -642,8 +639,6 @@ function generate_village(village, minp, maxp, data, param2_data, a, vnoise, dir
 	if( not( replacements.table )) then
 		replacements.table = {};
 	end
---print( minetest.serialize( replacements.table )..'\n...are the replacements for '..tostring( village_type )..'.'); -- TODO
---print( 'Village data: '..minetest.serialize( bpos )); -- TODO
 
 	local extranodes = {}
 	for _, pos in ipairs(bpos) do

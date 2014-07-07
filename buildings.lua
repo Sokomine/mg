@@ -3,7 +3,6 @@
 
 buildings = {
 
-
 -- the houses the mod came with
 	{sizex= 7,	sizez= 7,	yoff= 0,	ysize= 9,	scm="house", orients={2},                 weight={nore=1   }},
 	{sizex= 9,	sizez= 9,	yoff= 0,	ysize= 2,	scm="wheat_field",                        weight={nore=1   }},
@@ -45,50 +44,10 @@ buildings = {
 	{sizex= 5,	sizez= 5,	yoff= 0,	ysize= 6,	scm="grasshut6", orients={2}, weight={grasshut=1}},
 	{sizex= 7,	sizez= 7,	yoff= 0,	ysize= 2,	scm="grasshutcenter", orients={2}, pervillage=1, weight={grasshut=2}},
 
--- villages (requires cottages)
---[[
-      	{sizex=26,	sizez=12,	yoff= 0,	ysize=19,	scm="church_1", orients={0}, pervillage=1, weight={medieval=3}}, 
-
-    	{sizex=12,	sizez= 9,	yoff= 0,	ysize=11,	scm="forge_1",  orients={0}, pervillage=1, weight={medieval=3}},
-
-    	{sizex=15,	sizez=15,	yoff= 0,	ysize=18,	scm="mill_1",   orients={2}, pervillage=1, weight={medieval=3}},
-
-    	{sizex= 9,	sizez= 7,	yoff= 0,	ysize= 6,	scm="hut_1",    orients={0},               weight={medieval=1}},
-
-    	{sizex=18,	sizez=16,	yoff= 0,	ysize=17,	scm="taverne_1", orients={0}, pervillage=1, weight={medieval=1/4 }},
-    	{sizex=11,	sizez=13,	yoff= 0,	ysize=13,	scm="taverne_2", orients={0}, pervillage=1, weight={medieval=1/4 }},
-    	{sizex=15,	sizez=15,	yoff= 0,	ysize=12,	scm="taverne_3", orients={0}, pervillage=1, weight={medieval=1/4 }},
-    	{sizex=10,	sizez=12,	yoff= 0,	ysize= 6,	scm="taverne_4", orients={0}, pervillage=1, weight={medieval=1/4 }},
-
-    	{sizex= 5,	sizez= 5,	yoff= 0,	ysize= 6,	scm="well_1",    orients={0}, pervillage=1, weight={medieval=1/5 }},
-    	{sizex= 5,	sizez= 6,	yoff= 0,	ysize= 6,	scm="well_2",    orients={0}, pervillage=1, weight={medieval=1/5 }},
-    	{sizex= 8,	sizez=10,	yoff= 0,	ysize= 7,	scm="well_3",    orients={0}, pervillage=1, weight={medieval=1/5 }},
-    	{sizex= 5,	sizez= 5,	yoff= 0,	ysize= 6,	scm="well_4",    orients={0}, pervillage=1, weight={medieval=1/5 }},
-    	{sizex= 3,	sizez= 3,	yoff= 0,	ysize= 5,	scm="well_5",    orients={0}, pervillage=1, weight={medieval=1/5 }},
-    	{sizex= 5,	sizez= 4,	yoff= 0,	ysize= 5,	scm="well_6",    orients={0}, pervillage=1, weight={medieval=1/5 }},
-    	{sizex= 8,	sizez= 8,	yoff= 0,	ysize= 4,	scm="well_7",    orients={0}, pervillage=1, weight={medieval=1/5 }},
-    	{sizex=10,	sizez= 5,	yoff= 0,	ysize= 4,	scm="well_8",    orients={0}, pervillage=1, weight={medieval=1/5 }},
---]]
-
---  	{sizex=13,	sizez=13,	yoff= 0,	ysize=6, 	scm="farm_full_1", orients={0}, weight={medieval=1}},
---  	{sizex=14,	sizez=18,	yoff= 0,	ysize=10,	scm="farm_full_2", orients={0}, weight={medieval=1}},
---  	{sizex=16,	sizez=14,	yoff= 0,	ysize=11,	scm="farm_full_3", orients={0}, weight={medieval=1}},
---    	{sizex=18,	sizez=18,	yoff= 0,	ysize=14,	scm="farm_full_4", orients={0}, weight={medieval=1}},
---  	{sizex=23,	sizez=14,	yoff= 0,	ysize=13,	scm="farm_full_5", orients={0}, weight={medieval=1}},
---TODO  	{sizex=12,	sizez=12,	yoff= 0,	ysize=14,	scm="farm_full_6", orients={0}, weight={medieval=1}},
-
-    	{sizex=14,	sizez=12,	yoff= 0,	ysize= 8,	scm="farm_tiny_1", orients={0}, weight={medieval=1}},
-    	{sizex=12,	sizez=16,	yoff= 0,	ysize= 8,	scm="farm_tiny_2", orients={0}, weight={medieval=1}},
-    	{sizex=15,	sizez=16,	yoff= 0,	ysize=14,	scm="farm_tiny_3", orients={0}, weight={medieval=1}},
-    	{sizex=14,	sizez=17,	yoff= 0,	ysize=10,	scm="farm_tiny_4", orients={0}, weight={medieval=1}},
-    	{sizex=13,	sizez=19,	yoff= 0,	ysize= 9,	scm="farm_tiny_5", orients={0}, weight={medieval=1}},
-    	{sizex=15,	sizez=14,	yoff= 0,	ysize=10,	scm="farm_tiny_6", orients={0}, weight={medieval=1}}, -- oder 14 13?
-    	{sizex=13,	sizez=13,	yoff= 0,	ysize=13,	scm="farm_tiny_7", orients={0}, weight={medieval=1}},
-
 -- for the buildings below, sizex, sizez and ysize are read from the file directly;
 -- the entries "avoid" and "typ" are not used here
 
--- schematics from my villages mod
+-- schematics from Sokomines villages mod (requires cottages)
 	{scm="church_1",        yoff= 0, orients={0}, farming_plus=0, avoid='', typ='church',    weight={medieval=4}, pervillage=1},    
 	{scm="forge_1",         yoff= 0, orients={0}, farming_plus=0, avoid='', typ='forge',     weight={medieval=2}, pervillage=1},
 	{scm="mill_1",          yoff= 0, orients={0}, farming_plus=0, avoid='', typ='mill',      weight={medieval=2}, pervillage=1},
@@ -228,8 +187,6 @@ if(         minetest.get_modpath("cottages")) then
 end
 
 -- TODO: handle grasshut
-
-mg_village_types = {'taoki'};
 
 -- read the data files and fill in information like size and nodes that need on_construct to be called after placing
 mg_buildings_init = function()
