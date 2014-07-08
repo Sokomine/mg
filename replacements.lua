@@ -84,6 +84,24 @@ nvillages.get_replacement_list = function( housetype, pr, dirt_with_grass_replac
       return replacements;
    end
 
+
+   if( housetype == 'lumberjack' ) then
+      -- replace the wood - those are lumberjacks after all
+      local c = pr:next( 1, 4 );
+      if( c==2 ) then
+         table.insert( replacements, {'default:tree', 'default:jungletree' });
+         table.insert( replacements, {'default:wood', 'default:junglewood' });
+      elseif( c==3 ) then
+         table.insert( replacements, {'default:tree', 'mg:savannatree'});
+         table.insert( replacements, {'default:wood', 'mg:savannawood'});
+      elseif( c==4 ) then
+         table.insert( replacements, {'default:tree', 'mg:pinetree'});
+         table.insert( replacements, {'default:wood', 'mg:pinewood'});
+      end
+      return replacements;
+   end
+
+
    if( housetype == 'canadian' ) then
 
       if( true) then return {}; end -- TODO

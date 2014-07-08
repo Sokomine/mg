@@ -124,16 +124,20 @@ buildings = {
 	{scm="charachoal_hut",  yoff= 0, orients={0,1,2}, farming_plus=0, avoid='', typ='hut',  weight={charachoal=1}},
 	{scm="charachoal_hill", yoff= 0, orients={0,1,2,3}, farming_plus=0, avoid='', typ='hut',  weight={charachoal=1}},
 
---[[
 	-- lumberjacks; they require the cottages mod
-	{scm="haus1",           yoff= 0, orients={4}, avoid='', typ='lumberjack', weight={lumberjack=1}},
-	{scm="haus2",           yoff= 0, orients={4}, avoid='', typ='lumberjack', weight={lumberjack=1}},
-	{scm="haus3",           yoff= 0, orients={4}, avoid='', typ='lumberjack', weight={lumberjack=1}},
-	{scm="haus4",           yoff= 0, orients={4}, avoid='', typ='lumberjack', weight={lumberjack=1}},
-	{scm="haus5",           yoff= 0, orients={4}, avoid='', typ='lumberjack', weight={lumberjack=1}},
-	{scm="haus6",           yoff= 0, orients={4}, avoid='', typ='lumberjack', weight={lumberjack=1}},
-	{scm="haus7",           yoff= 0, orients={4}, avoid='', typ='lumberjack', weight={lumberjack=1}},
-	{scm="haus8",           yoff= 0, orients={4}, avoid='', typ='lumberjack', weight={lumberjack=1}},
+	{scm="lumberjack_1",        yoff= 1, orients={1}, avoid='', typ='lumberjack', weight={lumberjack=1}},
+	{scm="lumberjack_2",        yoff= 1, orients={1}, avoid='', typ='lumberjack', weight={lumberjack=1}},
+	{scm="lumberjack_3",        yoff= 1, orients={1}, avoid='', typ='lumberjack', weight={lumberjack=1}},
+	{scm="lumberjack_4",        yoff= 1, orients={1}, avoid='', typ='lumberjack', weight={lumberjack=1}},
+	{scm="lumberjack_5",        yoff= 1, orients={1}, avoid='', typ='lumberjack', weight={lumberjack=1}},
+	{scm="lumberjack_6",        yoff= 1, orients={1}, avoid='', typ='lumberjack', weight={lumberjack=1}},
+	{scm="lumberjack_7",        yoff= 1, orients={1}, avoid='', typ='lumberjack', weight={lumberjack=1}},
+	{scm="lumberjack_8",        yoff= 1, orients={1}, avoid='', typ='lumberjack', weight={lumberjack=1}},
+	{scm="lumberjack_pub_1",    yoff= 1, orients={1}, avoid='', typ='tavern',     weight={lumberjack=3}, pervillage=1},
+	{scm="lumberjack_church_1", yoff= 1, orients={1}, avoid='', typ='church',     weight={lumberjack=3}, pervillage=1},
+	{scm="lumberjack_hotel_1",  yoff= 1, orients={1}, avoid='', typ='house',      weight={lumberjack=1},},
+
+--[[
 	{scm="cow_trader_1",    yoff= 0, orients={4}, avoid='', typ='trader',     weight={lumberjack=1}},
 
 	-- clay traders depend on cottages as well
@@ -208,6 +212,7 @@ if( minetest.get_modpath( 'hdb' ) and minetest.get_modpath( 'nbu' )) then
 	table.insert( mg_village_types, 'canadian' );
 end
 
+--mg_village_types = {'lumberjack'};
 -- TODO: handle grasshut
 
 -- read the data files and fill in information like size and nodes that need on_construct to be called after placing
