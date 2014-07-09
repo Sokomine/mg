@@ -1,6 +1,17 @@
 
 --village_types = { 'nore', 'logcabin', 'grasshut', 'medieval', 'charachoal', 'taoki'};
 
+mg_village_sizes = {
+	nore         = { min = 20, max = 40},
+	taoki        = { min = 30, max = 90},
+	medieval     = { min = 25, max = 90},
+	charachoal   = { min = 10, max = 15},
+	lumberjack   = { min = 10, max = 20},
+	claytrader   = { min = 10, max = 20},
+	logcabin     = { min = 15, max = 30},
+	canadian     = { min = 30, max = 90},
+}
+
 buildings = {
 
 -- the houses the mod came with
@@ -201,7 +212,7 @@ if(         minetest.get_modpath("cottages")) then
 	table.insert( mg_village_types, 'medieval' );
 	table.insert( mg_village_types, 'charachoal' );
 	table.insert( mg_village_types, 'lumberjack' );
-	table.insert( mg_village_types, 'claytrader' );
+--	table.insert( mg_village_types, 'claytrader' );  TODO
 
 	if( minetest.get_modpath("glasspanes")) then
 		table.insert( mg_village_types, 'logcabin' );

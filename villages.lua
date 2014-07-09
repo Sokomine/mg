@@ -45,13 +45,16 @@ function villages_at_point(minp, noise1)
 	local x = pr:next(minp.x, minp.x + 79)
 	local z = pr:next(minp.z, minp.z + 79)
 	if noise1:get2d({x = x, y = z}) < -0.3 then return {} end -- Deep in the ocean
-	local type = pr:next(1, 1) -- TODO: actually make them
-	local size = pr:next(VILLAGE_MIN_SIZE, VILLAGE_MAX_SIZE) -- TODO: change to type-dependant sizes
+	local village_type = mg_village_types[ pr:next(1, #mg_village_types )]; -- select a random type
+	if( not( mg_village_sizes[ village_type ] )) then
+		mg_village_sizes[ village_type ] = { min = VILLAGE_MIN_SIZE, max = VILLAGE_MAX_SIZE };
+	end
+	local size = pr:next(mg_village_sizes[ village_type ].min, mg_village_sizes[ village_type ].max) -- TODO: change to type-dependant sizes
 	local height = pr:next(5, 20)
 
-	print("A village spawned at: x = "..x..", z = "..z)
+	print("A village of type \'"..tostring( village_type ).."\' of size "..tostring( size ).." spawned at: x = "..x..", z = "..z)
 	--print("A village spawned at: x = "..x..", z = "..z)
-	return {{vx = x, vz = z, vs = size, vh = height, type = type}}
+	return {{vx = x, vz = z, vs = size, vh = height, village_type = village_type}}
 end
 
 --local function dist_center2(ax, bsizex, az, bsizez)

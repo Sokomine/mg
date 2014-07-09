@@ -632,7 +632,7 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 
 	for _, village in ipairs(villages) do
 		-- select a random type of village
-		village.village_type = mg_village_types[ (( village.vx + village.vz )%(#mg_village_types) )+1 ];
+--		village.village_type = mg_village_types[ (( village.vx + village.vz )%(#mg_village_types) )+1 ];
 		village.to_add_data = generate_village(village, minp, maxp, data, param2_data, a, village_noise, top_node)
 	end
 
