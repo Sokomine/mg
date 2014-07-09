@@ -1,5 +1,13 @@
 mg = {}
 
+mg.mg_all_villages = {}
+
+dofile(minetest.get_modpath(minetest.get_current_modname()).."/save_restore.lua")
+mg.restore_data(); -- read mg.mg_all_villages data saved for this world from previous runs
+
+-- adds a command that allows to teleport to a known village
+dofile(minetest.get_modpath(minetest.get_current_modname()).."/chat_commands.lua")
+
 local ENABLE_SNOW = false
 
 local DMAX = 20
@@ -648,37 +656,57 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 
 	local meta
 	for _, village in ipairs(villages) do
-	for _, n in pairs(village.to_add_data.extranodes) do
-		minetest.set_node(n.pos, n.node)
-		if n.meta ~= nil then
-			meta = minetest.get_meta(n.pos)
-			meta:from_table(n.meta)
-			if n.node.name == "default:chest" then
-				local inv = meta:get_inventory()
-				local items = inv:get_list("main")
-				for i=1, inv:get_size("main") do
-					inv:set_stack("main", i, ItemStack(""))
-				end
-				local numitems = pr:next(3, 20)
-				for i=1,numitems do
-					local ii = pr:next(1, #items)
-					local prob = items[ii]:get_count() % 2 ^ 8
-					local stacksz = math.floor(items[ii]:get_count() / 2 ^ 8)
-					if pr:next(0, prob) == 0 and stacksz>0 then
-						stk = ItemStack({name=items[ii]:get_name(), count=pr:next(1, stacksz), wear=items[ii]:get_wear(), metadata=items[ii]:get_metadata()})
-						local ind = pr:next(1, inv:get_size("main"))
-						while not inv:get_stack("main",ind):is_empty() do
-							ind = pr:next(1, inv:get_size("main"))
+		for _, n in pairs(village.to_add_data.extranodes) do
+			minetest.set_node(n.pos, n.node)
+			if n.meta ~= nil then
+				meta = minetest.get_meta(n.pos)
+				meta:from_table(n.meta)
+				if n.node.name == "default:chest" then
+					local inv = meta:get_inventory()
+					local items = inv:get_list("main")
+					for i=1, inv:get_size("main") do
+						inv:set_stack("main", i, ItemStack(""))
+					end
+					local numitems = pr:next(3, 20)
+					for i=1,numitems do
+						local ii = pr:next(1, #items)
+						local prob = items[ii]:get_count() % 2 ^ 8
+						local stacksz = math.floor(items[ii]:get_count() / 2 ^ 8)
+						if pr:next(0, prob) == 0 and stacksz>0 then
+							stk = ItemStack({name=items[ii]:get_name(), count=pr:next(1, stacksz), wear=items[ii]:get_wear(), metadata=items[ii]:get_metadata()})
+							local ind = pr:next(1, inv:get_size("main"))
+							while not inv:get_stack("main",ind):is_empty() do
+								ind = pr:next(1, inv:get_size("main"))
+							end
+							inv:set_stack("main", ind, stk)
 						end
-						inv:set_stack("main", ind, stk)
 					end
 				end
 			end
 		end
-	end
 
-	-- now add those buildings which are .mts files and need to be placed by minetest.place_schematic(...)
-	mg_village_place_schematics( village.to_add_data.bpos, village.to_add_data.replacements, a, pr );
+		-- now add those buildings which are .mts files and need to be placed by minetest.place_schematic(...)
+		mg_village_place_schematics( village.to_add_data.bpos, village.to_add_data.replacements, a, pr );
+
+		if( not( mg.mg_all_villages )) then
+			mg.mg_all_villages = {};
+		end
+		-- unique id - there can only be one village at a given pair of x,z coordinates
+		local village_id = tostring( village.vx )..':'..tostring( village.vz );	
+		-- the village data is saved only once per village - and not whenever part of the village is generated
+		if( not( mg.mg_all_villages[ village_id ])) then
+
+			-- count how many villages we already have and assign each village a uniq number
+			local count = 1;
+			for _,v in pairs( mg.mg_all_villages ) do
+				count = count + 1;
+			end
+			village.nr = count;
+			mg.mg_all_villages[ village_id ] = minetest.deserialize( minetest.serialize( village ));
+
+			print("Village No. "..tostring( count ).." of type \'"..tostring( village.village_type ).."\' of size "..tostring( village.vs ).." spawned at: x = "..village.vx..", z = "..village.vz)
+			mg.save_data(); -- store mg.mg_all_villages on disk
+		end
 	end
 end
 

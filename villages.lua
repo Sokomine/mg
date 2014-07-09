@@ -52,7 +52,7 @@ function villages_at_point(minp, noise1)
 	local size = pr:next(mg_village_sizes[ village_type ].min, mg_village_sizes[ village_type ].max) -- TODO: change to type-dependant sizes
 	local height = pr:next(5, 20)
 
-	print("A village of type \'"..tostring( village_type ).."\' of size "..tostring( size ).." spawned at: x = "..x..", z = "..z)
+--	print("A village of type \'"..tostring( village_type ).."\' of size "..tostring( size ).." spawned at: x = "..x..", z = "..z)
 	--print("A village spawned at: x = "..x..", z = "..z)
 	return {{vx = x, vz = z, vs = size, vh = height, village_type = village_type}}
 end
@@ -471,6 +471,12 @@ mg_village_place_schematics = function( bpos, replacements, voxelarea, pr )
 
 		local binfo = buildings[pos.btype];
 
+		-- set fruits for all buildings in the village that need it - regardless weather they will be spawned
+		-- now or later; after the first call to this function here, the village data will be final
+		if( binfo.farming_plus and binfo.farming_plus == 1 and mg_fruit_list and not pos.furit) then
+ 			pos.fruit = mg_fruit_list[ pr:next( 1, #mg_fruit_list )];
+		end
+
 		-- We need to check all 8 corners of the building.
 		-- This will only work for buildings that are smaller than chunk size (relevant here: about 111 nodes)
 		-- The function only spawns buildings which are at least partly contained in this chunk/voxelarea.
@@ -486,7 +492,7 @@ mg_village_place_schematics = function( bpos, replacements, voxelarea, pr )
 
 			-- that function places schematics, adds snow where needed and stores information about the fruit
 			-- and the grass type used directly in the pos/bpos data structure
-			mg_village_place_one_schematic( bpos, replacements, pr, pos, mts_path );
+			mg_village_place_one_schematic( bpos, replacements, pos, mts_path );
 		end
 	end
 	--print('VILLAGE DATA: '..minetest.serialize( bpos ));
@@ -494,7 +500,7 @@ end
 
 
 -- also adds a snow layer for buildings spawned from .we files
-mg_village_place_one_schematic = function( bpos, replacements, pr, pos, mts_path )
+mg_village_place_one_schematic = function( bpos, replacements, pos, mts_path )
 
 	-- just for the record: count how many times this building has been placed already;
 	-- multiple placements are commen at chunk boundaries (may be up to 8 placements)
@@ -535,29 +541,24 @@ mg_village_place_one_schematic = function( bpos, replacements, pr, pos, mts_path
 			new_replacements[ i ] = repl;
 		end	
 
-		local new_fruit = '';
 		-- they don't all grow cotton; farming_plus fruits are far more intresting!
-		if( binfo.farming_plus and binfo.farming_plus == 1 and mg_fruit_list ) then
- 			new_fruit = mg_fruit_list[ pr:next( 1, #mg_fruit_list )];
-
-			-- save the choosen fruit replacement in the village data
-			pos.fruit = new_fruit;					
+		if( binfo.farming_plus and binfo.farming_plus == 1 and pos.fruit ) then
 
 			for i=1,8 do
 				-- farming_plus plants sometimes come in 3 or 4 variants, but not in 8 as cotton does
-				if(     minetest.registered_nodes[ 'farming_plus:'..new_fruit..'_'..i ]) then
-					table.insert( new_replacements, {"farming:cotton_"..i,  'farming_plus:'..new_fruit..'_'..i });
+				if(     minetest.registered_nodes[ 'farming_plus:'..pos.fruit..'_'..i ]) then
+					table.insert( new_replacements, {"farming:cotton_"..i,  'farming_plus:'..pos.fruit..'_'..i });
 			
 				-- "surplus" cotton variants will be replaced with the full grown fruit
-				elseif( minetest.registered_nodes[ 'farming_plus:'..new_fruit ]) then
-					table.insert( new_replacements, {"farming:cotton_"..i,  'farming_plus:'..new_fruit });
+				elseif( minetest.registered_nodes[ 'farming_plus:'..pos.fruit ]) then
+					table.insert( new_replacements, {"farming:cotton_"..i,  'farming_plus:'..pos.fruit });
 
 				-- and plants from farming: are supported as well
-				elseif( minetest.registered_nodes[ 'farming:'..new_fruit..'_'..i ]) then
-					table.insert( new_replacements, {"farming:cotton_"..i,  'farming:'..new_fruit..'_'..i });
+				elseif( minetest.registered_nodes[ 'farming:'..pos.fruit..'_'..i ]) then
+					table.insert( new_replacements, {"farming:cotton_"..i,  'farming:'..pos.fruit..'_'..i });
 
-				elseif( minetest.registered_nodes[ 'farming:'..new_fruit ]) then
-					table.insert( new_replacements, {"farming:cotton_"..i,  'farming:'..new_fruit });
+				elseif( minetest.registered_nodes[ 'farming:'..pos.fruit ]) then
+					table.insert( new_replacements, {"farming:cotton_"..i,  'farming:'..pos.fruit });
 				end
 			end
 		end
@@ -672,3 +673,4 @@ function generate_village(village, minp, maxp, data, param2_data, a, vnoise, dir
 	-- replacements are in list format for minetest.place_schematic(..) type spawning
 	return { extranodes = extranodes, bpos = bpos, replacements = replacements.list };
 end
+

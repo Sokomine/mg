@@ -19,7 +19,7 @@ nvillages.get_replacement_list = function( housetype, pr, dirt_with_grass_replac
       -- the main body of the houses in the .mts files is made out of wood
       local materials = {'default:wood', 'default:junglewood', 'mg:pinewood', 'mg:savannawood',
 		'default:clay', 'default:brick', 'default:sandstone', 
-		'default:stonebrick', 'default:desert_stonebrick','default:sandstonebrick', 'default:sandstone','default:stone','default:desertstone',
+		'default:stonebrick', 'default:desert_stonebrick','default:sandstonebrick', 'default:sandstone','default:stone','default:desert_stone',
 		'default:coalblock','default:steelblock','default:goldblock', 'default:bronzeblock', 'default:copperblock', 'wool:white'};
       local m1 = materials[ pr:next( 1, #materials )];
       if( m1 ~= 'default:wood' ) then
@@ -104,7 +104,8 @@ nvillages.get_replacement_list = function( housetype, pr, dirt_with_grass_replac
 
    if( housetype == 'canadian' ) then
 
-      if( true) then return {}; end -- TODO
+      table.insert( replacements, {'4seasons:slimtree_wood', 'default:fence_wood'});
+      if( true) then return replacements; end -- TODO
       -- remove inner corners, wallpapers etc.
       local to_air = { 38, 36, 68, 66, 69, 67, 77, 47, 44, 43, 37, 75, 45, 65, 71, 76, 46 };
       for _,v in ipairs( to_air ) do
@@ -130,7 +131,7 @@ nvillages.get_replacement_list = function( housetype, pr, dirt_with_grass_replac
      -- these contain the majority of nodes used (junglewood is too dark)
       local materials = {'default:wood', 'mg:pinewood', 'mg:savannawood',
 		'default:clay', 'default:brick', 'default:sandstone', 
-		'default:stonebrick', 'default:desert_stonebrick','default:sandstonebrick', 'default:sandstone','default:stone','default:desertstone',
+		'default:stonebrick', 'default:desert_stonebrick','default:sandstonebrick', 'default:sandstone','default:stone','default:desert_stone',
 		'default:coalblock','default:steelblock'};
 
 --      local change_groups = { {49, 16, 29, 33, 82, 8}, {19,  4, 83,  2}, { 5, 80, 35, 36, 3}, {10, 31}, {28, 78}, { 6, 52, 1}, {7}};
