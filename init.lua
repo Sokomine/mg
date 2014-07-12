@@ -7,6 +7,9 @@ mg.restore_data(); -- read mg.mg_all_villages data saved for this world from pre
 
 -- adds a command that allows to teleport to a known village
 dofile(minetest.get_modpath(minetest.get_current_modname()).."/chat_commands.lua")
+-- protect villages from griefing
+dofile(minetest.get_modpath(minetest.get_current_modname()).."/protection.lua")
+
 
 local ENABLE_SNOW = false
 
