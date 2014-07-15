@@ -1,4 +1,6 @@
 
+minetest.register_privilege("mg_villages", { description = "Allows to teleport to villages via /vist <nr>", give_to_singleplayer = false});
+
 mg.list_villages_formspec = function( player, formname, fields )
 
 	if( not( player ) or fields.quit) then
