@@ -88,21 +88,28 @@ local function choose_building(l, pr, village_type)
 		if( not( btype )) then
 			return 1;
 		end
-		if buildings[btype].pervillage ~= nil then
-			local n = 0
-			for j=1, #l do
-				if l[j].btype == btype then
-					n = n + 1
+		if( #l<1
+			or not( buildings[btype].avoid )
+			or buildings[btype].avoid==''
+			or not( buildings[ l[#l].btype ].avoid )
+			or buildings[btype].avoid ~= buildings[ l[#l].btype ].avoid) then
+
+			if buildings[btype].pervillage ~= nil then
+				local n = 0
+				for j=1, #l do
+					if( l[j].btype == btype or (buildings[btype].typ and buildings[btype].typ == buildings[ l[j].btype ].typ)) then
+						n = n + 1
+					end
 				end
-			end
-			--if n >= buildings[btype].pervillage then
-			--	goto choose
-			--end
-			if n < buildings[btype].pervillage then
+				--if n >= buildings[btype].pervillage then
+				--	goto choose
+				--end
+				if n < buildings[btype].pervillage then
+					return btype
+				end
+			else
 				return btype
 			end
-		else
-			return btype
 		end
 	end
 	--return btype
