@@ -449,7 +449,11 @@ mg_get_local_dirt_with_grass = function( pos, size_x, size_z )
 
 	for i, p in ipairs( positions ) do
 		local n = minetest.get_node( p );
-		if( n and n ~= nil and n.name and n.name ~= 'air' and n.name ~= 'ignore') then
+		if( n and n ~= nil and n.name and n.name ~= 'air' and n.name ~= 'ignore'
+			-- only count nodes that are acceptable as replacements for dirt_with_grass
+			and (n.name=='default:dirt' or n.name=='default:dirt_with_grass' or n.name=='default:dirt_with_snow' 
+			     or n.name=='default:sand' or n.name=='mg:dirt_with_dry_grass')) then
+
 			if( not( types[ n.name ] )) then
 				types[ n.name ] = 1;
 			else
@@ -598,14 +602,20 @@ mg_village_place_one_schematic = function( bpos, replacements, pos, mts_path )
 		-- note: after_place_node is not handled here because we do not have a player at hand that could be used for it
 	end
 
-	-- add snowblocks on snow nodes; this needs to be done for .mts and .we files alike
-	if( dirt_with_grass_replacement and dirt_with_grass_replacement == 'default:dirt_with_snow' ) then
+	-- add snowblocks on snow nodes; this needs to be done for .mts and .we files alike;
+ 	-- this also changes the grass type for those nodes that do not have a fitting type
+	if( dirt_with_grass_replacement ) then
 
+		if( dirt_with_grass_replacement == 'default:dirt_with_snow' ) then
+			cover = 'default:snow';
+		else
+			cover = nil;
+		end
 		local nodes = minetest.find_nodes_in_area( start_pos, end_pos, {'default:dirt','default:dirt_with_grass','default:dirt_with_snow','mg:dirt_with_dry_grass'});
 		for _, p in ipairs(nodes) do
 			local above = minetest.get_node( { x=p.x, y=p.y+1, z=p.z } );
-			if( above and above.name and above.name == 'air' ) then
-				minetest.set_node( {x=p.x, y=p.y+1, z=p.z}, { name='default:snow'} );
+			if( cover and above and above.name and above.name == 'air' ) then
+				minetest.set_node( {x=p.x, y=p.y+1, z=p.z}, { name=cover} );
 			end
 			-- adjust the surface grass for .we files
 			if( not( binfo.is_mts == 1 )) then
