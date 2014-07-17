@@ -3,6 +3,8 @@ minetest.register_node("mg:savannatree", {
 	tiles = {"mg_dry_tree_top.png", "mg_dry_tree_top.png", "mg_dry_tree.png"},
 	groups = {tree=1,choppy=2,oddly_breakable_by_hand=1,flammable=2},
 	sounds = default.node_sound_wood_defaults(),
+	paramtype2 = "facedir",
+	on_place = minetest.rotate_node,
 })
 
 minetest.register_node("mg:savannaleaves", {
@@ -91,6 +93,8 @@ minetest.register_node("mg:pinetree", {
 	tiles = {"mg_pine_tree_top.png", "mg_pine_tree_top.png", "mg_pine_tree.png"},
 	groups = {tree=1,choppy=2,oddly_breakable_by_hand=1,flammable=2},
 	sounds = default.node_sound_wood_defaults(),
+	paramtype2 = "facedir",
+	on_place = minetest.rotate_node,
 })
 
 minetest.register_node("mg:pineleaves", {
