@@ -3,13 +3,13 @@
 
 mg_village_sizes = {
 	nore         = { min = 20, max = 40},
-	taoki        = { min = 30, max = 90},
-	medieval     = { min = 25, max = 90},
+	taoki        = { min = 40, max = 90},
+	medieval     = { min = 25, max = 60},
 	charachoal   = { min = 10, max = 15},
-	lumberjack   = { min = 10, max = 25},
+	lumberjack   = { min = 10, max = 30},
 	claytrader   = { min = 10, max = 20},
 	logcabin     = { min = 15, max = 30},
-	canadian     = { min = 30, max = 90},
+	canadian     = { min = 40, max = 110},
 }
 
 buildings = {
@@ -149,7 +149,7 @@ buildings = {
 	-- lumberjacks; they require the cottages mod
 	{scm="lumberjack_1",        yoff= 1, orients={1}, avoid='', typ='lumberjack', weight={lumberjack=1}},
 	{scm="lumberjack_2",        yoff= 1, orients={1}, avoid='', typ='lumberjack', weight={lumberjack=1}},
-	{scm="lumberjack_3",        yoff= 1, orients={1}, avoid='', typ='lumberjack', weight={lumberjack=1}},
+	{scm="lumberjack_3",        yoff= 1, orients={0}, avoid='', typ='lumberjack', weight={lumberjack=1}},
 	{scm="lumberjack_4",        yoff= 1, orients={1}, avoid='', typ='lumberjack', weight={lumberjack=1}},
 	{scm="lumberjack_5",        yoff= 1, orients={1}, avoid='', typ='lumberjack', weight={lumberjack=1}},
 	{scm="lumberjack_6",        yoff= 1, orients={1}, avoid='', typ='lumberjack', weight={lumberjack=1}},
@@ -164,11 +164,11 @@ buildings = {
 --	{scm="cow_trader_1",    yoff= 0, orients={4}, avoid='', typ='trader',     weight={lumberjack=1}},
 
 	-- clay traders depend on cottages as well
-	{scm="trader_clay_1",   yoff= 1, orients={1}, avoid='', typ='trader',     weight={claytrader=2}},
-	{scm="trader_clay_2",   yoff= 1, orients={3}, avoid='', typ='trader',     weight={claytrader=2}},
-	{scm="trader_clay_3",   yoff= 1, orients={0}, avoid='', typ='trader',     weight={claytrader=2}},
-	{scm="trader_clay_4",   yoff= 1, orients={2}, avoid='', typ='trader',     weight={claytrader=2}},
-	{scm="trader_clay_5",   yoff= 1, orients={1}, avoid='', typ='trader',     weight={claytrader=2}},
+	{scm="trader_clay_1",   yoff= 1, orients={1}, avoid='', typ='trader',     weight={claytrader=3}},
+	{scm="trader_clay_2",   yoff= 1, orients={3}, avoid='', typ='trader',     weight={claytrader=3}},
+	{scm="trader_clay_3",   yoff= 1, orients={0}, avoid='', typ='trader',     weight={claytrader=3}},
+	{scm="trader_clay_4",   yoff= 1, orients={2}, avoid='', typ='trader',     weight={claytrader=3}},
+	{scm="trader_clay_5",   yoff= 1, orients={1}, avoid='', typ='trader',     weight={claytrader=3}},
 
 	{scm="clay_pit_1",      yoff=-3, orients={0,1,2,3}, avoid='', typ='pit',        weight={claytrader=1}},
 	{scm="clay_pit_2",      yoff=-2, orients={0,1,2,3}, avoid='', typ='pit',        weight={claytrader=1}},
