@@ -6,7 +6,7 @@ mg_village_sizes = {
 	taoki        = { min = 30, max = 90},
 	medieval     = { min = 25, max = 90},
 	charachoal   = { min = 10, max = 15},
-	lumberjack   = { min = 10, max = 20},
+	lumberjack   = { min = 10, max = 25},
 	claytrader   = { min = 10, max = 20},
 	logcabin     = { min = 15, max = 30},
 	canadian     = { min = 30, max = 90},
@@ -160,16 +160,22 @@ buildings = {
 	{scm="lumberjack_hotel_1",  yoff= 1, orients={1}, avoid='', typ='house',      weight={lumberjack=1},},
 	{scm="lumberjack_shop_1",   yoff= 1, orients={1}, avoid='', typ='shop',       weight={lumberjack=1}, pervillage=1},
 
---[[
-	{scm="cow_trader_1",    yoff= 0, orients={4}, avoid='', typ='trader',     weight={lumberjack=1}},
+
+--	{scm="cow_trader_1",    yoff= 0, orients={4}, avoid='', typ='trader',     weight={lumberjack=1}},
 
 	-- clay traders depend on cottages as well
-	{scm="trader_clay_1",   yoff= 0, orients={4}, avoid='', typ='trader',     weight={claytrader=1}},
-	{scm="trader_clay_2",   yoff= 0, orients={4}, avoid='', typ='trader',     weight={claytrader=1}},
-	{scm="trader_clay_3",   yoff= 0, orients={4}, avoid='', typ='trader',     weight={claytrader=1}},
-	{scm="trader_clay_4",   yoff= 0, orients={4}, avoid='', typ='trader',     weight={claytrader=1}},
-	{scm="trader_clay_5",   yoff= 0, orients={4}, avoid='', typ='trader',     weight={claytrader=1}},
---]]
+	{scm="trader_clay_1",   yoff= 1, orients={1}, avoid='', typ='trader',     weight={claytrader=2}},
+	{scm="trader_clay_2",   yoff= 1, orients={3}, avoid='', typ='trader',     weight={claytrader=2}},
+	{scm="trader_clay_3",   yoff= 1, orients={0}, avoid='', typ='trader',     weight={claytrader=2}},
+	{scm="trader_clay_4",   yoff= 1, orients={2}, avoid='', typ='trader',     weight={claytrader=2}},
+	{scm="trader_clay_5",   yoff= 1, orients={1}, avoid='', typ='trader',     weight={claytrader=2}},
+
+	{scm="clay_pit_1",      yoff=-3, orients={0,1,2,3}, avoid='', typ='pit',        weight={claytrader=1}},
+	{scm="clay_pit_2",      yoff=-2, orients={0,1,2,3}, avoid='', typ='pit',        weight={claytrader=1}},
+	{scm="clay_pit_3",      yoff=-7, orients={0,1,2,3}, avoid='', typ='pit',        weight={claytrader=1}},
+	{scm="clay_pit_4",      yoff= 0, orients={0,1,2,3}, avoid='', typ='pit',        weight={claytrader=1}},
+	{scm="clay_pit_5",      yoff= 1, orients={0,1,2,3}, avoid='', typ='pit',        weight={claytrader=1}},
+
 
    -- Houses from Taokis Structure I/O Mod (see https://forum.minetest.net/viewtopic.php?id=5524)
 
@@ -224,7 +230,7 @@ if(         minetest.get_modpath("cottages")) then
 	table.insert( mg_village_types, 'medieval' );
 	table.insert( mg_village_types, 'charachoal' );
 	table.insert( mg_village_types, 'lumberjack' );
---	table.insert( mg_village_types, 'claytrader' );  TODO
+	table.insert( mg_village_types, 'claytrader' ); 
 
 	if( minetest.get_modpath("glasspanes")) then
 		table.insert( mg_village_types, 'logcabin' );
@@ -236,6 +242,8 @@ if( minetest.get_modpath( 'hdb' ) and minetest.get_modpath( 'nbu' )) then
 end
 
 --mg_village_types = {'lumberjack'};
+--mg_village_types = {'medieval'};
+--mg_village_types = {'claytrader'};
 -- TODO: handle grasshut
 
 -- read the data files and fill in information like size and nodes that need on_construct to be called after placing

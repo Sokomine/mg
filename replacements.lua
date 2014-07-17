@@ -58,7 +58,7 @@ nvillages.get_replacement_list = function( housetype, pr, dirt_with_grass_replac
 
 
    if( housetype == 'nore' ) then
-      local materials = {'default:stonebrick', 'default:desert_stonebrick','default:sandstonebrick', 'default:sandstone','default:stone','deafult:desertstone'};
+      local materials = {'default:stonebrick', 'default:desert_stonebrick','default:sandstonebrick', 'default:sandstone','default:stone','default:desert_stone'};
       local m1 = materials[ pr:next( 1, #materials )];
       if( m1 ~= 'default:stonebrick' ) then
          table.insert( replacements, {'default:stonebrick', m1 });
@@ -188,6 +188,47 @@ nvillages.get_replacement_list = function( housetype, pr, dirt_with_grass_replac
       table.insert( replacements, {'dryplants:wetreed_roof_corner_2',  'default:junglewood' });
       table.insert( replacements, {'cavestuff:desert_pebble_2',        'default:slab_cobble' });
    
+      return replacements;
+   end
+
+
+   if( housetype == 'claytrader' ) then
+      -- TODO: if cottages mod is not installed, replace bench and beds
+
+      local materials_main = { 'brick', 'stone', 'sandstone', 'sandstonebrick', 'desert_stone', 'desert_cobble', 'desert_stonebrick' };
+      local mm = materials_main[ pr:next( 1, #materials_main )];
+      if( mm ~= 'brick' ) then
+         table.insert( replacements, {'stairs:stair_brick',               'stairs:stair_'..mm });
+         table.insert( replacements, {'stairs:slab_brick',                'stairs:slab_'..mm });
+         table.insert( replacements, {'default:brick',                    'default:'..mm });
+      end
+
+      local materials_floor = { 'brick', 'stone', 'sandstone', 'sandstonebrick', 'clay', 'desert_stone', 'desert_cobble', 'desert_stonebrick' };
+      local mf = materials_floor[ pr:next( 1, #materials_floor )];
+      if( mf ~= 'stone' ) then
+         table.insert( replacements, {'default:stone',                    'default:'..mf });
+      end
+
+      -- straw is the most likely building material for roofs for historical buildings
+      local materials_roof = {'straw', 'straw', 'straw', 'straw', 'straw',
+			   'stone',	
+			   'reet', 'reet', 'reet',
+			   'slate', 'slate',
+                           'wood',  'wood',  
+                           'red',
+                           'brown',
+                           'black'};
+      local mr = materials_roof[ pr:next( 1, #materials_roof )];
+      if( mr ~= 'stone' ) then
+         -- the clay trader houses are built with stone roofs
+         table.insert( replacements, {'stairs:stair_stone',               'cottages:roof_connector_'..mr });
+         table.insert( replacements, {'stairs:slab_stone',                'cottages:roof_flat_'..mr });
+      end
+     
+      local materials_abbau = {'sand', 'sandstone', 'clay'};
+      local ma = materials_abbau[ pr:next( 1, #materials_abbau )];
+      table.insert( replacements, {'default:stone_with_coal',             'default:'..ma });
+
       return replacements;
    end
 
