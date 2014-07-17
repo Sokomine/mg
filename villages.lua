@@ -604,7 +604,7 @@ mg_village_place_one_schematic = function( bpos, replacements, pos, mts_path )
 
 	-- add snowblocks on snow nodes; this needs to be done for .mts and .we files alike;
  	-- this also changes the grass type for those nodes that do not have a fitting type
-	if( dirt_with_grass_replacement ) then
+	if( dirt_with_grass_replacement and pos.btype ~= 'road' ) then
 
 		if( dirt_with_grass_replacement == 'default:dirt_with_snow' ) then
 			cover = 'default:snow';
@@ -618,7 +618,7 @@ mg_village_place_one_schematic = function( bpos, replacements, pos, mts_path )
 				minetest.set_node( {x=p.x, y=p.y+1, z=p.z}, { name=cover} );
 			end
 			-- adjust the surface grass for .we files
-			if( not( binfo.is_mts == 1 )) then
+			if( not( binfo.is_mts == 1 ) and binfo.yoff < 1) then
 				local n     = minetest.get_node( p );
 				if( n and n.name and n.name ~= dirt_with_grass_replacement ) then
 					minetest.set_node( p, { name = dirt_with_grass_replacement } );
