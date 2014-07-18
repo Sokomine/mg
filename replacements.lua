@@ -308,7 +308,7 @@ nvillages.get_replacement_list = function( housetype, pr, dirt_with_grass_replac
                       'default:clay',  'default:clay',  'default:clay',  'default:clay',  'default:clay',
                       'default:wood','default:junglewood','default:sandstone',
                       'default:desert_stone','default:brick','default:cobble','default:stonebrick',
-                      'default:desert_stonebrick','default:sandstonebrick','default:stone','default:glass',
+                      'default:desert_stonebrick','default:sandstonebrick','default:stone',
                       'mg:savannawood', 'mg:savannawood', 'mg:savannawood', 'mg:savannawood',
                       'mg:pinewood',    'mg:pinewood',    'mg:pinewood',    'mg:pinewood' };
 
