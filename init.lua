@@ -360,6 +360,9 @@ dofile(minetest.get_modpath(minetest.get_current_modname()).."/replacements.lua"
 dofile(minetest.get_modpath(minetest.get_current_modname()).."/villages.lua")
 dofile(minetest.get_modpath(minetest.get_current_modname()).."/ores.lua")
 
+-- create and show a map of the world
+dofile(minetest.get_modpath(minetest.get_current_modname()).."/map_of_world.lua")
+
 function get_biome_table(minp, humidity, temperature, range)
 	if range == nil then range = 1 end
 	local l = {}

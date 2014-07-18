@@ -1,15 +1,15 @@
 
 --village_types = { 'nore', 'logcabin', 'grasshut', 'medieval', 'charachoal', 'taoki'};
 
-mg_village_sizes = {
-	nore         = { min = 20, max = 40},
-	taoki        = { min = 40, max = 90},
-	medieval     = { min = 25, max = 60},
-	charachoal   = { min = 10, max = 15},
-	lumberjack   = { min = 10, max = 30},
-	claytrader   = { min = 10, max = 20},
-	logcabin     = { min = 15, max = 30},
-	canadian     = { min = 40, max = 110},
+mg.mg_village_sizes = {
+	nore         = { min = 20, max = 40,   texture = 'default_stone_brick.png'},
+	taoki        = { min = 40, max = 90,   texture = 'default_brick.png' },
+	medieval     = { min = 25, max = 60,   texture = 'cottages_darkage_straw.png'}, -- they often have straw roofs
+	charachoal   = { min = 10, max = 15,   texture = 'default_coal_block.png'},
+	lumberjack   = { min = 10, max = 30,   texture = 'default_tree.png'},
+	claytrader   = { min = 10, max = 20,   texture = 'default_clay.png'},
+	logcabin     = { min = 15, max = 30,   texture = 'default_wood.png'},
+	canadian     = { min = 40, max = 110,  texture = 'wool_white.png'},
 }
 
 buildings = {
@@ -244,6 +244,7 @@ end
 --mg_village_types = {'lumberjack'};
 --mg_village_types = {'medieval'};
 --mg_village_types = {'claytrader'};
+--mg_village_types = {'grasshut'};
 -- TODO: handle grasshut
 
 -- read the data files and fill in information like size and nodes that need on_construct to be called after placing
