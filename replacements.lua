@@ -13,7 +13,7 @@ nvillages.replace_materials = function( replacements, pr, original_materials, pr
 			if( minetest.registered_nodes[ p..m ] ) then
 				table.insert( known_materials, m );
 				-- if wood is present, later on try moretrees wood as well
-				if( 'default:wood' == p..m ) then
+				if( 'default:wood' == m ) then
 					wood_found = true;
 				end
 			end
