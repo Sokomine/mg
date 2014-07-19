@@ -45,7 +45,16 @@ function villages_at_point(minp, noise1)
 	local x = pr:next(minp.x, minp.x + 79)
 	local z = pr:next(minp.z, minp.z + 79)
 	if noise1:get2d({x = x, y = z}) < -0.3 then return {} end -- Deep in the ocean
-	local village_type = mg_village_types[ pr:next(1, #mg_village_types )]; -- select a random type
+
+	-- fallback: type "nore" (that is what the mod originally came with)
+	local village_type = 'nore';
+	-- if this is the first village for this world, take a medieval one
+	if( (not( mg.mg_all_villages ) or #mg.mg_all_villages < 1) and minetest.get_modpath("cottages") ) then
+		village_type = 'medieval';
+	else
+		village_type = mg_village_types[ pr:next(1, #mg_village_types )]; -- select a random type
+	end
+
 	if( not( mg.mg_village_sizes[ village_type ] )) then
 		mg.mg_village_sizes[ village_type ] = { min = VILLAGE_MIN_SIZE, max = VILLAGE_MAX_SIZE };
 	end
