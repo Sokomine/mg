@@ -1,6 +1,7 @@
 mg = {}
 
 mg.mg_all_villages = {}
+mg.anz_villages = 0;
 
 dofile(minetest.get_modpath(minetest.get_current_modname()).."/save_restore.lua")
 mg.restore_data(); -- read mg.mg_all_villages data saved for this world from previous runs
@@ -438,6 +439,14 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 			village.to_grow = {}
 			villages[#villages+1] = village
 		end
+		-- check if the village exists already
+		local v_nr = 1;
+		for v_nr, village in ipairs(villages) do
+			local village_id = tostring( village.vx )..':'..tostring( village.vz );
+			if( mg.mg_all_villages and mg.mg_all_villages[ village_id ]) then
+				villages[ v_nr ] = mg.mg_all_villages[ village_id ];
+			end
+		end
 	end
 	end
 	
@@ -708,6 +717,7 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 				count = count + 1;
 			end
 			village.nr = count;
+			mg.anz_villages = count;
 			mg.mg_all_villages[ village_id ] = minetest.deserialize( minetest.serialize( village ));
 
 			print("Village No. "..tostring( count ).." of type \'"..tostring( village.village_type ).."\' of size "..tostring( village.vs ).." spawned at: x = "..village.vx..", z = "..village.vz)

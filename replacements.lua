@@ -409,11 +409,13 @@ end
 
 
 -- mapgen based replacements work best using a table, while minetest.place_schematic(..) based spawning needs a list
-nvillages.get_replacement_table = function( housetype, pr, dirt_with_grass_replacement )
+nvillages.get_replacement_table = function( housetype, pr, dirt_with_grass_replacement, replacements )
 
 	local rtable = {};
 	local ids    = {};
-	local replacements = nvillages.get_replacement_list( housetype, pr, dirt_with_grass_replacement );
+	if( not( replacements )) then
+		replacements = nvillages.get_replacement_list( housetype, pr, dirt_with_grass_replacement );
+	end
 	for i,v in ipairs( replacements ) do
 		if( v and #v == 2 ) then
 			rtable[ v[1] ] = v[2];

@@ -49,7 +49,7 @@ function villages_at_point(minp, noise1)
 	-- fallback: type "nore" (that is what the mod originally came with)
 	local village_type = 'nore';
 	-- if this is the first village for this world, take a medieval one
-	if( (not( mg.mg_all_villages ) or #mg.mg_all_villages < 1) and minetest.get_modpath("cottages") ) then
+	if( (not( mg.mg_all_villages ) or mg.anz_villages < 1) and minetest.get_modpath("cottages") ) then
 		village_type = 'medieval';
 	else
 		village_type = mg_village_types[ pr:next(1, #mg_village_types )]; -- select a random type
@@ -536,7 +536,7 @@ mg_village_place_one_schematic = function( bpos, replacements, pos, mts_path )
 	local end_pos   = { x=( pos.x+pos.bsizex), y=(pos.y + binfo.yoff + binfo.ysize), z=( pos.z + pos.bsizez )};
 
 	-- check sourrounding nodes for information on which grass type we really ought to use
-	local dirt_with_grass_replacement = mg_get_local_dirt_with_grass( pos, bsizex, bsizez ); 
+	local dirt_with_grass_replacement = mg_get_local_dirt_with_grass( pos, pos.bsizex, pos.bsizez ); 
 
 	-- this function is only responsible for files that are in .mts format
 	if( binfo.is_mts == 1 ) then
@@ -674,7 +674,25 @@ function generate_village(village, minp, maxp, data, param2_data, a, vnoise, dir
 	local village_type = village.village_type;
 	local seed = get_bseed({x=vx, z=vz})
 	local pr_village = PseudoRandom(seed)
-	local bpos = generate_bpos( village, pr_village, vnoise)
+
+	-- only generate a new village if the data is not already stored
+	-- (the algorithm is fast, but village types and houses which are available may change later on,
+  	-- and that might easily cause chaos if the village is generated again with diffrent input)
+	local new_village      = false;
+	local bpos             = {};
+	local replacement_list = {};
+	if( not( village.to_add_data ) or not( village.to_add_data.bpos ) or not( village.to_add_data.replacements )) then
+		bpos             = generate_bpos( village, pr_village, vnoise)
+		replacement_list = nil;
+		new_village      = true;
+print('VILLAGE GENREATION: NEW'); -- TODO
+	else
+		-- get the saved data
+		bpos             = village.to_add_data.bpos;
+		replacement_list = village.to_add_data.replacements;
+		new_village      = false;
+print('VILLAGE GENREATION: USING ALREADY GENERATED VILLAGE.'); -- TODO
+	end
 
 	--generate_walls(bpos, data, a, minp, maxp, vh, vx, vz, vs, vnoise)
 	local pr = PseudoRandom(seed)
@@ -684,8 +702,10 @@ function generate_village(village, minp, maxp, data, param2_data, a, vnoise, dir
 		end
 	end
 
+	-- a changing replacement list would also be pretty confusing
 	local p = PseudoRandom(seed);
-	local replacements = nvillages.get_replacement_table( village.village_type, p, dirt_with_grass_replacement );
+	-- if the village is new, replacement_list is nil and a new replacement list will be created
+	local replacements = nvillages.get_replacement_table( village.village_type, p, dirt_with_grass_replacement, replacement_list );
 
 	if( not( replacements.table )) then
 		replacements.table = {};
