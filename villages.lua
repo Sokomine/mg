@@ -395,37 +395,91 @@ local function generate_building(pos, minp, maxp, data, param2_data, a, pr, extr
 	scm = rotate(scm, pos.brotate)
 	local c_ignore = minetest.get_content_id("ignore")
 	local c_air = minetest.get_content_id("air")
+	local c_snow                 = minetest.get_content_id( "default:snow");
+	local c_dirt                 = minetest.get_content_id( "default:dirt" );
+	local c_dirt_with_grass      = minetest.get_content_id( "default:dirt_with_grass" );
+	local c_dirt_with_snow       = minetest.get_content_id( "default:dirt_with_snow" );
+	local c_dirt_with_dry_grass  = minetest.get_content_id( "default:dirt_with_dry_grass" );
+	local c_gravel               = minetest.get_content_id( "default:gravel");
 	for x = 0, pos.bsizex-1 do
-	for y = 0, binfo.ysize-1 do
 	for z = 0, pos.bsizez-1 do
-		ax, ay, az = pos.x+x, pos.y+y+binfo.yoff, pos.z+z
-		if (ax >= minp.x and ax <= maxp.x) and (ay >= minp.y and ay <= maxp.y) and (az >= minp.z and az <= maxp.z) then
+		local has_snow = false;
+		for y = 0, binfo.ysize-1 do
+			ax, ay, az = pos.x+x, pos.y+y+binfo.yoff, pos.z+z
+			if (ax >= minp.x and ax <= maxp.x) and (ay >= minp.y and ay <= maxp.y) and (az >= minp.z and az <= maxp.z) then
+	
+				t = scm[y+1][x+1][z+1]
+	
+				if( binfo.yoff+y == 0 ) then
+					local node_content = data[a:index(ax, ay, az)];
+					-- no snow on the gravel roads
+					if( node_content ~= c_gravel and ( node_content == c_dirt_with_snow or data[a:index(ax, ay+1, az)]==c_snow)) then
+						has_snow = true;
+					end
+				end
+	
+				if type(t) == "table" then
+					if( t.node and t.node.name and replacements.table[ t.node.name ] ) then
+						t.node.name    = replacements.table[ t.node.name ];
+					end
+					if( t.node and t.node.content and replacements.ids[ t.node.content ] ) then
+						t.node.content = replacements.ids[   t.node.content ];
+					end
+					if t.extranode then
+						table.insert(extranodes, {node = t.node, meta = t.meta, pos = {x = ax, y = ay, z = az}})
+					else
+						-- at ground level, do keep the old ground node if that is already some kind of dirt with something on
+						-- (provided the new node is also either dirt or dirt with grass)
+						if( not( binfo.yoff+y==0 and (t.node.content == c_dirt or t.node.content == c_dirt_with_grass))) then
 
-			t = scm[y+1][x+1][z+1]
-
-			if type(t) == "table" then
-				if( t.node and t.node.name and replacements.table[ t.node.name ] ) then
-					t.node.name    = replacements.table[ t.node.name ];
+							data[a:index(ax, ay, az)] = t.node.content
+							param2_data[a:index(ax, ay, az)] = t.node.param2
+						end
+					end
+				-- air and gravel
+				elseif t ~= c_ignore then
+	
+					if( t and replacements.ids[ t ] ) then
+						t = replacements.ids[ t ];
+					end
+					data[a:index(ax, ay, az)] = t
 				end
-				if( t.node and t.node.content and replacements.ids[ t.node.content ] ) then
-					t.node.content = replacements.ids[   t.node.content ];
-				end
-				if t.extranode then
-					table.insert(extranodes, {node = t.node, meta = t.meta, pos = {x = ax, y = ay, z = az}})
-				else
-					data[a:index(ax, ay, az)] = t.node.content
-					param2_data[a:index(ax, ay, az)] = t.node.param2
-				end
-			-- air and gravel
-			elseif t ~= c_ignore then
-
-				if( t and replacements.ids[ t ] ) then
-					t = replacements.ids[ t ];
-				end
-				data[a:index(ax, ay, az)] = t
 			end
 		end
-	end
+--has_snow = true;
+		local y = binfo.ysize;
+		local ax = pos.x + x;
+		local ay = pos.y+y+binfo.yoff+1;
+		local az = pos.z + z;
+		-- drop the snow on top
+		if( has_snow and moresnow and moresnow.suggest_snow_type and ax >= minp.x and ax <= maxp.x and az >= minp.z and az <= maxp.z) then
+			while( has_snow and ay > minp.y and ay <= maxp.y) do -- needs to beo ay > minp.y because we are intrested in the node below
+				ay = ay-1;
+				local node       = data[a:index(ax, ay,   az)];
+				local node_below = data[a:index(ax, ay-1, az)];
+				if( node==c_air and node_below ~= c_air ) then
+					local suggested = moresnow.suggest_snow_type( node_below, param2_data[a:index(ax, ay-1, az)] );
+					-- c_snow_top can only exist when the node 2 below is a solid one
+					if( suggested.new_id == moresnow.c_snow_top or suggested.new_id==c_snow_fence) then	
+						local node_below2 = data[a:index(ax, ay-2, az)];
+						if( node_below2 ~= c_air ) then
+							local suggested2 = moresnow.suggest_snow_type( node_below2, param2_data[a:index(ax, ay-2, az)] );
+							-- that snow node can be placed here
+							if( suggested2.new_id == moresnow.c_snow ) then
+								data[       a:index(ax, ay, az)] = suggested.new_id;
+								param2_data[a:index(ax, ay, az)] = suggested.param2;
+								has_snow = false;
+							end
+						end
+					elseif( suggested.new_id ~= c_ignore ) then
+						data[       a:index(ax, ay, az)] = suggested.new_id;
+						param2_data[a:index(ax, ay, az)] = suggested.param2;
+						has_snow = false;
+
+					end
+				end
+			end
+		end
 	end
 	end
 end
