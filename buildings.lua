@@ -290,7 +290,7 @@ mg_buildings_init = function()
 			buildings[ i ].after_place_node = res.after_place_node;
 
 		-- determine size of worldedit schematics
-		elseif( res and #res and #res[1] and #res[1][1]) then
+		elseif( res and #res and #res>0 and #res[1] and #res[1][1]) then
 
 			-- scm has the following structure: scm[y][x][z] 
 			buildings[ i ].ysize = #res;
@@ -308,6 +308,7 @@ mg_buildings_init = function()
 			or   buildings[ i ].sizex == 0 or      buildings[ i ].sizez==0) then
 
 			-- no village will use it
+			print('[mg] INFO: No schematic found for building \''..tostring( buildings[ i ].scm )..'\'. Will not use that building.');
 			buildings[ i ].weight = {};
 
 		else
