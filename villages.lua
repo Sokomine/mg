@@ -374,6 +374,54 @@ local function generate_bpos(village, pr, vnoise)
 	return l
 end
 
+
+-- they don't all grow cotton; farming_plus fruits are far more intresting!
+-- Note: This function modifies replacements.ids and replacements.table for each building
+--       as far as fruits are concerned. It needs to be called before placing a building
+--       which contains fruits.
+mg.get_fruit_replacements = function( replacements, fruit)
+
+	if( not( fruit )) then
+		return;
+	end
+
+	for i=1,8 do
+		local old_name = '';
+		local new_name = '';
+		-- farming_plus plants sometimes come in 3 or 4 variants, but not in 8 as cotton does
+		if(     minetest.registered_nodes[ 'farming_plus:'..fruit..'_'..i ]) then
+			old_name = "farming:cotton_"..i;
+			new_name = 'farming_plus:'..fruit..'_'..i;
+	
+		-- "surplus" cotton variants will be replaced with the full grown fruit
+		elseif( minetest.registered_nodes[ 'farming_plus:'..fruit ]) then
+			old_name = "farming:cotton_"..i;
+			new_name = 'farming_plus:'..fruit;
+
+		-- and plants from farming: are supported as well
+		elseif( minetest.registered_nodes[ 'farming:'..fruit..'_'..i ]) then
+			old_name = "farming:cotton_"..i;
+			new_name = 'farming:'..fruit..'_'..i;
+
+		elseif( minetest.registered_nodes[ 'farming:'..fruit ]) then
+			old_name = "farming:cotton_"..i;
+			new_name = 'farming:'..fruit;
+		end
+
+		if( old_name ~= '' and new_name ~= '' ) then
+			-- this is mostly used by the voxelmanip based spawning of .we files
+			replacements.ids[ minetest.get_content_id( old_name )] = minetest.get_content_id( new_name );
+			-- this is used by the place_schematic based spawning	
+			for i,v in ipairs( replacements.table ) do
+				if( v and #v and v[1]==old_name ) then
+					v[2] = new_name;
+				end
+			end
+		end
+	end
+end
+
+
 local function generate_building(pos, minp, maxp, data, param2_data, a, pr, extranodes, replacements)
 	local binfo = buildings[pos.btype]
 	local scm
@@ -393,17 +441,24 @@ local function generate_building(pos, minp, maxp, data, param2_data, a, pr, extr
 		scm = binfo.scm
 	end
 	scm = rotate(scm, pos.brotate)
+
+
+	-- the fruit is set per building, not per village as the other replacements
+	if( binfo.farming_plus and binfo.farming_plus == 1 and pos.fruit ) then
+		mg.get_fruit_replacements( replacements, pos.fruit);
+	end
+
 	local c_ignore = minetest.get_content_id("ignore")
 	local c_air = minetest.get_content_id("air")
 	local c_snow                 = minetest.get_content_id( "default:snow");
 	local c_dirt                 = minetest.get_content_id( "default:dirt" );
 	local c_dirt_with_grass      = minetest.get_content_id( "default:dirt_with_grass" );
 	local c_dirt_with_snow       = minetest.get_content_id( "default:dirt_with_snow" );
-	local c_dirt_with_dry_grass  = minetest.get_content_id( "default:dirt_with_dry_grass" );
 	local c_gravel               = minetest.get_content_id( "default:gravel");
 	for x = 0, pos.bsizex-1 do
 	for z = 0, pos.bsizez-1 do
-		local has_snow = false;
+		local has_snow    = false;
+		local ground_type = c_dirt_with_grass; 
 		for y = 0, binfo.ysize-1 do
 			ax, ay, az = pos.x+x, pos.y+y+binfo.yoff, pos.z+z
 			if (ax >= minp.x and ax <= maxp.x) and (ay >= minp.y and ay <= maxp.y) and (az >= minp.z and az <= maxp.z) then
@@ -413,28 +468,39 @@ local function generate_building(pos, minp, maxp, data, param2_data, a, pr, extr
 				if( binfo.yoff+y == 0 ) then
 					local node_content = data[a:index(ax, ay, az)];
 					-- no snow on the gravel roads
-					if( node_content ~= c_gravel and ( node_content == c_dirt_with_snow or data[a:index(ax, ay+1, az)]==c_snow)) then
-						has_snow = true;
+					if( node_content == c_dirt_with_snow or data[a:index(ax, ay+1, az)]==c_snow) then
+						has_snow    = true;
 					end
+
+					ground_type = node_content;
 				end
 	
 				if type(t) == "table" then
-					if( t.node and t.node.name and replacements.table[ t.node.name ] ) then
-						t.node.name    = replacements.table[ t.node.name ];
-					end
-					if( t.node and t.node.content and replacements.ids[ t.node.content ] ) then
-						t.node.content = replacements.ids[   t.node.content ];
-					end
+					-- handle extranodes
 					if t.extranode then
-						table.insert(extranodes, {node = t.node, meta = t.meta, pos = {x = ax, y = ay, z = az}})
-					else
-						-- at ground level, do keep the old ground node if that is already some kind of dirt with something on
-						-- (provided the new node is also either dirt or dirt with grass)
-						if( not( binfo.yoff+y==0 and (t.node.content == c_dirt or t.node.content == c_dirt_with_grass))) then
-
-							data[a:index(ax, ay, az)] = t.node.content
-							param2_data[a:index(ax, ay, az)] = t.node.param2
+						-- do replacements for extranodes; those are name-based
+						if( replacements.table[ t.node.name ]) then
+							t.node.name    = replacements.table[ t.node.name ];
 						end
+						-- in case such a node is replaced with dirt, just proceed
+						if( t.node.name == 'default:dirt' or t.node.name == 'default:dirt_with_grass' ) then
+							data[a:index(ax, ay, az)] = ground_type;
+						-- else the data will be stored and added later on
+						else
+							table.insert(extranodes, {node = t.node, meta = t.meta, pos = {x = ax, y = ay, z = az}})
+						end
+					else
+						-- do replacements for normal nodes with facedir or wallmounted
+						if( replacements.ids[ t.node.content ]) then
+							t.node.content = replacements.ids[   t.node.content ];
+						end
+						-- replace all dirt and dirt with grass at that x,z coordinate with the stored ground grass node;
+						-- this case here applies only to nodes which where facedir/wallmounted prior to their above replacement
+						if( t.node.content == c_dirt or t.node.content == c_dirt_with_grass ) then
+							t.node.content = ground_type;
+						end
+						data[       a:index(ax, ay, az)] = t.node.content;
+						param2_data[a:index(ax, ay, az)] = t.node.param2;
 					end
 				-- air and gravel
 				elseif t ~= c_ignore then
@@ -442,11 +508,14 @@ local function generate_building(pos, minp, maxp, data, param2_data, a, pr, extr
 					if( t and replacements.ids[ t ] ) then
 						t = replacements.ids[ t ];
 					end
+					if( t and t==c_dirt or t==c_dirt_with_grass ) then
+						t = ground_type;
+					end
 					data[a:index(ax, ay, az)] = t
 				end
 			end
 		end
---has_snow = true;
+
 		local y = binfo.ysize;
 		local ax = pos.x + x;
 		local ay = pos.y+y+binfo.yoff+1;
@@ -457,7 +526,7 @@ local function generate_building(pos, minp, maxp, data, param2_data, a, pr, extr
 				ay = ay-1;
 				local node       = data[a:index(ax, ay,   az)];
 				local node_below = data[a:index(ax, ay-1, az)];
-				if( node==c_air and node_below ~= c_air ) then
+				if( node==c_air and node_below ~= c_air and node_below ~= c_snow and node_below ~= c_gravel) then
 					local suggested = moresnow.suggest_snow_type( node_below, param2_data[a:index(ax, ay-1, az)] );
 					-- c_snow_top can only exist when the node 2 below is a solid one
 					if( suggested.new_id == moresnow.c_snow_top or suggested.new_id==c_snow_fence) then	
@@ -536,7 +605,6 @@ end
 -- similar to generate_building, except that it uses minetest.place_schematic(..) instead of changing voxelmanip data;
 -- this has advantages for nodes that use facedir;
 -- the function is called AFTER the mapgen data has been written in init.lua
--- pr is used to determine which fruit to grow on small farms
 mg_village_place_schematics = function( bpos, replacements, voxelarea, pr )
 
 	local mts_path = minetest.get_modpath("mg").."/schems/";
@@ -545,11 +613,6 @@ mg_village_place_schematics = function( bpos, replacements, voxelarea, pr )
 
 		local binfo = buildings[pos.btype];
 
-		-- set fruits for all buildings in the village that need it - regardless weather they will be spawned
-		-- now or later; after the first call to this function here, the village data will be final
-		if( binfo.farming_plus and binfo.farming_plus == 1 and mg_fruit_list and not pos.furit) then
- 			pos.fruit = mg_fruit_list[ pr:next( 1, #mg_fruit_list )];
-		end
 
 		-- We need to check all 8 corners of the building.
 		-- This will only work for buildings that are smaller than chunk size (relevant here: about 111 nodes)
@@ -564,7 +627,7 @@ mg_village_place_schematics = function( bpos, replacements, voxelarea, pr )
 		      or voxelarea:contains( pos.x,              pos.y - binfo.yoff + binfo.ysize, pos.z + pos.bsizez )
 		      or voxelarea:contains( pos.x + pos.bsizex, pos.y - binfo.yoff + binfo.ysize, pos.z + pos.bsizez ) )) then
 
-			-- that function places schematics, adds snow where needed and stores information about the fruit
+			-- that function places schematics, adds snow where needed 
 			-- and the grass type used directly in the pos/bpos data structure
 			mg_village_place_one_schematic( bpos, replacements, pos, mts_path );
 		end
@@ -609,45 +672,14 @@ mg_village_place_one_schematic = function( bpos, replacements, pos, mts_path )
 			rotation = (rotation + binfo.rotated ) % 360;
 		end
 
-		-- copy the replacement list so that there are no duplicate entries
-		local new_replacements = {};
-		for i, repl in ipairs( replacements ) do	
-			new_replacements[ i ] = repl;
-		end	
-
-		-- they don't all grow cotton; farming_plus fruits are far more intresting!
+		-- the fruit is set per building, not per village as the other replacements
 		if( binfo.farming_plus and binfo.farming_plus == 1 and pos.fruit ) then
-
-			for i=1,8 do
-				-- farming_plus plants sometimes come in 3 or 4 variants, but not in 8 as cotton does
-				if(     minetest.registered_nodes[ 'farming_plus:'..pos.fruit..'_'..i ]) then
-					table.insert( new_replacements, {"farming:cotton_"..i,  'farming_plus:'..pos.fruit..'_'..i });
-			
-				-- "surplus" cotton variants will be replaced with the full grown fruit
-				elseif( minetest.registered_nodes[ 'farming_plus:'..pos.fruit ]) then
-					table.insert( new_replacements, {"farming:cotton_"..i,  'farming_plus:'..pos.fruit });
-
-				-- and plants from farming: are supported as well
-				elseif( minetest.registered_nodes[ 'farming:'..pos.fruit..'_'..i ]) then
-					table.insert( new_replacements, {"farming:cotton_"..i,  'farming:'..pos.fruit..'_'..i });
-
-				elseif( minetest.registered_nodes[ 'farming:'..pos.fruit ]) then
-					table.insert( new_replacements, {"farming:cotton_"..i,  'farming:'..pos.fruit });
-				end
-			end
+			mg.get_fruit_replacements( replacements, pos.fruit);
 		end
-
-		-- avoid duplicate entries
-		for i, repl in ipairs( new_replacements ) do
-			if( repl and #repl and #repl>1 and (repl[1]=='default:dirt_with_grass' or repl[1]=='default:dirt' )) then
-				new_replacements[ i ][ 2 ] = dirt_with_grass_replacement;
-			end
-		end
-
 
 --		print( 'PLACED BUILDING '..tostring( binfo.scm )..' AT '..minetest.pos_to_string( pos )..'. Max. size: '..tostring( max_xz )..' grows: '..tostring(fruit));
 		-- force placement (we want entire buildings)
-		minetest.place_schematic( start_pos, mts_path..binfo.scm..'.mts', tostring( rotation ), new_replacements, true);
+		minetest.place_schematic( start_pos, mts_path..binfo.scm..'.mts', tostring( rotation ), replacements, true);
 
 		-- TODO: add snow on roofs and roof-slabs and stairs
 
@@ -664,10 +696,10 @@ mg_village_place_one_schematic = function( bpos, replacements, pos, mts_path )
 
 		-- note: after_place_node is not handled here because we do not have a player at hand that could be used for it
 	end
-
+--[[ -- TODO
 	-- add snowblocks on snow nodes; this needs to be done for .mts and .we files alike;
  	-- this also changes the grass type for those nodes that do not have a fitting type
-	if( dirt_with_grass_replacement and pos.btype ~= 'road' ) then
+	if( dirt_with_grass_replacement and pos.btype ~= 'road' and binfo.is_mts == 1) then -- TODO
 
 		if( dirt_with_grass_replacement == 'default:dirt_with_snow' ) then
 			cover = 'default:snow';
@@ -683,13 +715,13 @@ mg_village_place_one_schematic = function( bpos, replacements, pos, mts_path )
 			-- adjust the surface grass for .we files
 			if( not( binfo.is_mts == 1 ) and binfo.yoff < 1) then
 				local n     = minetest.get_node( p );
-				if( n and n.name and n.name ~= dirt_with_grass_replacement ) then
+				if( n and n.name and n.name ~= dirt_with_grass_replacement and dirt_with_grass_replacement) then
 					minetest.set_node( p, { name = dirt_with_grass_replacement } );
 				end
 			end
 		end
 	end	
-
+--]]
 	-- save the dirt_with_grass_replacement choosen for this particular building in the village data
 	pos.grass_type = dirt_with_grass_replacement;
 
@@ -737,17 +769,29 @@ function generate_village(village, minp, maxp, data, param2_data, a, vnoise, dir
 	local replacement_list = {};
 	if( not( village.to_add_data ) or not( village.to_add_data.bpos ) or not( village.to_add_data.replacements )) then
 		bpos             = generate_bpos( village, pr_village, vnoise)
+
+		-- set fruits for all buildings in the village that need it - regardless weather they will be spawned
+		-- now or later; after the first call to this function here, the village data will be final
+		for _, pos in ipairs( bpos ) do
+			local binfo = buildings[pos.btype];
+			if( binfo.farming_plus and binfo.farming_plus == 1 and mg_fruit_list and not pos.furit) then
+ 				pos.fruit = mg_fruit_list[ pr_village:next( 1, #mg_fruit_list )];
+			end
+		end
+
 		replacement_list = nil;
 		new_village      = true;
-print('VILLAGE GENREATION: NEW'); -- TODO
+print('VILLAGE GENREATION: NEW (Nr. '..tostring( village_nr )..')'); -- TODO
 	else
 		-- get the saved data
 		bpos             = village.to_add_data.bpos;
 		replacement_list = village.to_add_data.replacements;
 		new_village      = false;
-print('VILLAGE GENREATION: USING ALREADY GENERATED VILLAGE.'); -- TODO
+print('VILLAGE GENREATION: USING ALREADY GENERATED VILLAGE: Nr. '..tostring( village.nr )); -- TODO
+-- TODO		local forget_bpos  = generate_bpos( village, pr_village, vnoise)
 	end
 
+village.to_grow = {}; -- TODO this is a temporal solution to avoid flying tree thrunks
 	--generate_walls(bpos, data, a, minp, maxp, vh, vx, vz, vs, vnoise)
 	local pr = PseudoRandom(seed)
 	for _, g in ipairs(village.to_grow) do
@@ -759,7 +803,7 @@ print('VILLAGE GENREATION: USING ALREADY GENERATED VILLAGE.'); -- TODO
 	-- a changing replacement list would also be pretty confusing
 	local p = PseudoRandom(seed);
 	-- if the village is new, replacement_list is nil and a new replacement list will be created
-	local replacements = nvillages.get_replacement_table( village.village_type, p, dirt_with_grass_replacement, replacement_list );
+	local replacements = nvillages.get_replacement_table( village.village_type, p, replacement_list );
 
 	if( not( replacements.table )) then
 		replacements.table = {};

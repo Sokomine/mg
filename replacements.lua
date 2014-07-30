@@ -70,13 +70,14 @@ end
 -- at least the cottages may come in a variety of building materials
 -- IMPORTANT: don't add any nodes which have on_construct here UNLESS they where in the original file already
 --            on_construct will only be called for known nodes that need that treatment (see villages.analyze_mts_file and on_constr)
-nvillages.get_replacement_list = function( housetype, pr, dirt_with_grass_replacement )
+nvillages.get_replacement_list = function( housetype, pr )
 
    local replacements = {};
 
   -- else some grass would never (re)grow (if it's below a roof)
-   table.insert( replacements, {'default:dirt',            dirt_with_grass_replacement });
-   table.insert( replacements, {'default:dirt_with_grass', dirt_with_grass_replacement });
+--   table.insert( replacements, {'default:dirt',            dirt_with_grass_replacement });
+--   table.insert( replacements, {'default:dirt_with_grass', dirt_with_grass_replacement });
+   table.insert( replacements, {'default:dirt',            'default:dirt_with_grass' });
 
    -- Taokis houses from structure i/o
    if( housetype == 'taoki' ) then  
@@ -409,12 +410,12 @@ end
 
 
 -- mapgen based replacements work best using a table, while minetest.place_schematic(..) based spawning needs a list
-nvillages.get_replacement_table = function( housetype, pr, dirt_with_grass_replacement, replacements )
+nvillages.get_replacement_table = function( housetype, pr, replacements )
 
 	local rtable = {};
 	local ids    = {};
 	if( not( replacements )) then
-		replacements = nvillages.get_replacement_list( housetype, pr, dirt_with_grass_replacement );
+		replacements = nvillages.get_replacement_list( housetype, pr );
 	end
 	for i,v in ipairs( replacements ) do
 		if( v and #v == 2 ) then
