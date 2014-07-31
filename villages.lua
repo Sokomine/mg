@@ -422,6 +422,79 @@ mg.get_fruit_replacements = function( replacements, fruit)
 end
 
 
+
+-- either uses get_node_or_nil(..) or the data from voxelmanip
+mg.get_node_somehow = function( x, y, z, a, data, param2_data )
+	if( a and data and param2_data ) then
+		return { content = data[a:index(x, y, z)], param2 = param2_data[a:index(x, y, z)] };
+	end
+	-- no voxelmanip; get the node the normal way
+	local node = minetest.get_node_or_nil( {x=x, y=y, z=z} );
+	if( not( node ) ) then
+		return { content = c_ignore, param2 = 0 };
+	end
+	return { content = minetest.get_content_id( node.name ), param2 = node.param2, name = node.name };
+end
+
+
+-- "drop" moresnow snow on diffrent shapes; works for voxelmanip and node-based setting
+mg.mg_drop_moresnow = function( x, z, y_top, y_bottom, a, data, param2_data)
+
+	-- this only works if moresnow is installed
+	if( not( moresnow ) or not( moresnow.suggest_snow_type )) then
+		return;
+	end
+
+	local y = y_top;
+	local node_above = mg.get_node_somehow( x, y+1, z, a, data, param2_data );	
+	local node_below = nil;
+	while( y >= y_bottom ) do
+
+		node_below = mg.get_node_somehow( x, y, z, a, data, param2_data );
+		if(     node_above.content == c_air
+		    and node_below.content ~= c_ignore
+		    and node_below.content ~= c_air ) then
+
+			-- if the node below drops snow when digged (i.e. is either snow or a moresnow node), we're finished
+			local get_drop = minetest.get_name_from_content_id( node_below.content );
+			if( get_drop ) then
+				get_drop = minetest.registered_nodes[ get_drop ];
+				if( get_drop and get_drop.drop and type( get_drop.drop )=='string' and get_drop.drop == 'default:snow') then
+					return;
+				end
+			end
+			if(     node_below.content ~= c_snow 
+			    and node_below.content ~= c_gravel
+			    and node_below.content ~= c_snow ) then
+				local suggested = moresnow.suggest_snow_type( node_below.content, node_below.param2 );
+
+				-- c_snow_top and c_snow_fence can only exist when the node 2 below is a solid one
+				if(    suggested.new_id == moresnow.c_snow_top
+				    or suggested.new_id == moresnow.c_snow_fence) then	
+					local node_below2 = mg.get_node_somehow( x, y-1, z, a, data, param2_data);
+					if(     node_below2.content ~= c_ignore
+					    and node_below2.content ~= c_air ) then
+						local suggested2 = moresnow.suggest_snow_type( node_below2.content, node_below2.param2 );
+
+						if( suggested2.new_id == moresnow.c_snow ) then
+							return { height = y+1, suggested = suggested };
+						end
+					end
+				-- it is possible that this is not the right shape; if so, the snow will continue to fall down
+				elseif( suggested.new_id ~= moresnow.c_ignore ) then
+						
+					return { height = y+1, suggested = suggested };
+				end
+			end
+			-- TODO return; -- abort; there is no fitting moresnow shape for the node below
+		end
+		y = y-1;
+		node_above = node_below;
+	end
+end
+
+
+
 local function generate_building(pos, minp, maxp, data, param2_data, a, pr, extranodes, replacements)
 	local binfo = buildings[pos.btype]
 	local scm
@@ -516,37 +589,22 @@ local function generate_building(pos, minp, maxp, data, param2_data, a, pr, extr
 			end
 		end
 
-		local y = binfo.ysize;
 		local ax = pos.x + x;
-		local ay = pos.y+y+binfo.yoff+1;
 		local az = pos.z + z;
-		-- drop the snow on top
-		if( has_snow and moresnow and moresnow.suggest_snow_type and ax >= minp.x and ax <= maxp.x and az >= minp.z and az <= maxp.z) then
-			while( has_snow and ay > minp.y and ay <= maxp.y) do -- needs to beo ay > minp.y because we are intrested in the node below
-				ay = ay-1;
-				local node       = data[a:index(ax, ay,   az)];
-				local node_below = data[a:index(ax, ay-1, az)];
-				if( node==c_air and node_below ~= c_air and node_below ~= c_snow and node_below ~= c_gravel) then
-					local suggested = moresnow.suggest_snow_type( node_below, param2_data[a:index(ax, ay-1, az)] );
-					-- c_snow_top can only exist when the node 2 below is a solid one
-					if( suggested.new_id == moresnow.c_snow_top or suggested.new_id==moresnow.c_snow_fence) then	
-						local node_below2 = data[a:index(ax, ay-2, az)];
-						if( node_below2 ~= c_air ) then
-							local suggested2 = moresnow.suggest_snow_type( node_below2, param2_data[a:index(ax, ay-2, az)] );
-							-- that snow node can be placed here
-							if( suggested2.new_id == moresnow.c_snow ) then
-								data[       a:index(ax, ay, az)] = suggested.new_id;
-								param2_data[a:index(ax, ay, az)] = suggested.param2;
-								has_snow = false;
-							end
-						end
-					elseif( suggested.new_id ~= c_ignore ) then
-						data[       a:index(ax, ay, az)] = suggested.new_id;
-						param2_data[a:index(ax, ay, az)] = suggested.param2;
-						has_snow = false;
-
-					end
-				end
+		local y_top    = pos.y+binfo.yoff+binfo.ysize;
+		if( y_top+1 > maxp.y ) then
+			y_top = maxp.y-1;
+		end
+		local y_bottom = pos.y+binfo.yoff;
+		if( y_bottom < minp.y ) then
+			y_bottom = minp.y;
+		end
+		if( has_snow and ax >= minp.x and ax <= maxp.x and az >= minp.z and az <= maxp.z ) then
+			local res = mg.mg_drop_moresnow( ax, az, y_top, y_bottom, a, data, param2_data);
+			if( res ) then
+				data[       a:index(ax, res.height, az)] = res.suggested.new_id;
+				param2_data[a:index(ax, res.height, az)] = res.suggested.param2;
+				has_snow = false;
 			end
 		end
 	end
@@ -729,49 +787,16 @@ mg_village_place_one_schematic = function( bpos, replacements, pos, mts_path )
 			end
 		end
 
-		-- TODO: add snow on roofs, slabs, stairs, fences, ...
+		-- add snow on roofs, slabs, stairs, fences, ...
 		for x = start_pos.x, end_pos.x do
 			for z = start_pos.z, end_pos.z do
 				if( moresnow and moresnow.suggest_snow_type and has_snow[ tostring(x)..':'..tostring(z) ] ) then
 
-					local node_above = minetest.get_node( {x=x, y=end_pos.y+1, z=z });
-					local node_below = nil;
-					local y = end_pos.y;
-					while( y >= start_pos.y ) do
-						if( node_above and node_above.name and node_above.name == 'air') then
-							node_below = minetest.get_node( {x=x, y=y, z=z});	
-							if(    node_below and node_below.name and node_below.name ~= 'ignore' and node_below.name ~= 'air' ) then
-								local drop = minetest.registered_nodes[ node_below.name ];
-								if( drop and drop.drop and type( drop.drop )=='string') then
-									drop = drop.drop;
-								end
-								if( node_below.name ~= 'default:snow' and node_below.name ~= 'default:gravel' and drop ~= 'default:snow') then
-									-- finished; do not try to place any more snow
-									local suggested = moresnow.suggest_snow_type( minetest.get_content_id( node_below.name ), node_below.param2 );
-									if( suggested.new_id == moresnow.c_snow_top or suggested.new_id==moresnow.c_snow_fence) then	
-										local node_below2 = minetest.get_node( {x=x, y=y-1, z=z});
-										if( node_below2 and node_below2.name and node_below2 ~= 'ignore' and node_below2 ~= 'air' ) then
-											local suggested2 = moresnow.suggest_snow_type( minetest.get_content_id( node_below2.name ), node_below2.param2 );
-											if( suggested2.new_id == moresnow.c_snow ) then
-												minetest.swap_node( {x=x, y=y+1, z=z}, --{ name = 'default:snow' } );
-													{ name=minetest.get_name_from_content_id( suggested.new_id ), param2=suggested.param2 });
-											end
-										end
-									-- it is possible that this is not the right shape; if so, the snow will continue to fall down
-									elseif( suggested.new_id ~= moresnow.c_ignore ) then
-											
-										minetest.swap_node( {x=x, y=y+1, z=z}, --{ name = 'default:snow' } );
-											{ name= minetest.get_name_from_content_id( suggested.new_id ), param2=suggested.param2 });
-										-- we have dropped the snow; end the loop
-									end
-								end
-								y = start_pos.y-1;
-							end
-						end
-						y = y-1;
-						node_above = node_below;
+					local res = mg.mg_drop_moresnow( x, z, end_pos.y, start_pos.y, nil, nil, nil );
+					if( res ) then
+						minetest.swap_node( {x=x, y=res.height, z=z}, 
+							{ name=minetest.get_name_from_content_id( res.suggested.new_id ), param2=res.suggested.param2 });
 					end
-
 				end
 			end
 		end
@@ -836,13 +861,13 @@ function generate_village(village, minp, maxp, data, param2_data, a, vnoise, dir
 
 		replacement_list = nil;
 		new_village      = true;
-print('VILLAGE GENREATION: NEW (Nr. '..tostring( village_nr )..')'); -- TODO
+--print('VILLAGE GENREATION: NEW (Nr. '..tostring( village_nr )..')'); -- TODO
 	else
 		-- get the saved data
 		bpos             = village.to_add_data.bpos;
 		replacement_list = village.to_add_data.replacements;
 		new_village      = false;
-print('VILLAGE GENREATION: USING ALREADY GENERATED VILLAGE: Nr. '..tostring( village.nr )); -- TODO
+--print('VILLAGE GENREATION: USING ALREADY GENERATED VILLAGE: Nr. '..tostring( village.nr )); -- TODO
 -- TODO		local forget_bpos  = generate_bpos( village, pr_village, vnoise)
 	end
 
