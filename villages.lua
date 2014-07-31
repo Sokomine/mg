@@ -58,7 +58,7 @@ function villages_at_point(minp, noise1)
 	if( not( mg.mg_village_sizes[ village_type ] )) then
 		mg.mg_village_sizes[ village_type ] = { min = VILLAGE_MIN_SIZE, max = VILLAGE_MAX_SIZE };
 	end
-	local size = pr:next(mg.mg_village_sizes[ village_type ].min, mg.mg_village_sizes[ village_type ].max) -- TODO: change to type-dependant sizes
+	local size = pr:next(mg.mg_village_sizes[ village_type ].min, mg.mg_village_sizes[ village_type ].max) 
 	local height = pr:next(5, 20)
 
 --	print("A village of type \'"..tostring( village_type ).."\' of size "..tostring( size ).." spawned at: x = "..x..", z = "..z)
@@ -529,7 +529,7 @@ local function generate_building(pos, minp, maxp, data, param2_data, a, pr, extr
 				if( node==c_air and node_below ~= c_air and node_below ~= c_snow and node_below ~= c_gravel) then
 					local suggested = moresnow.suggest_snow_type( node_below, param2_data[a:index(ax, ay-1, az)] );
 					-- c_snow_top can only exist when the node 2 below is a solid one
-					if( suggested.new_id == moresnow.c_snow_top or suggested.new_id==c_snow_fence) then	
+					if( suggested.new_id == moresnow.c_snow_top or suggested.new_id==moresnow.c_snow_fence) then	
 						local node_below2 = data[a:index(ax, ay-2, az)];
 						if( node_below2 ~= c_air ) then
 							local suggested2 = moresnow.suggest_snow_type( node_below2, param2_data[a:index(ax, ay-2, az)] );
@@ -677,11 +677,34 @@ mg_village_place_one_schematic = function( bpos, replacements, pos, mts_path )
 			mg.get_fruit_replacements( replacements, pos.fruit);
 		end
 
+		-- find out which ground types are used and where we need to place snow later on
+		local ground_types = {};
+		local has_snow     = {};
+		for x = start_pos.x, end_pos.x do
+			for z = start_pos.z, end_pos.z do
+				-- store which particular grass type (or sand/desert sand or whatever) was there before placing the building
+				local node = minetest.get_node( {x=x, y=pos.y,     z=z} );
+				if( node and node.name and node.name ~= 'ignore' and node.name ~= 'air'
+				         and node.name ~= 'default:dirt' and node.name ~= 'default:dirt_with_grass') then
+					ground_types[ tostring(x)..':'..tostring(z) ] = node.name;
+				end
+				-- find out if there is snow above
+				node = minetest.get_node(       {x=x, y=(pos.y+1), z=z} );
+				local node2 = minetest.get_node({x=x, y=(start_pos.y-2), z=z} );
+				if( node and node.name and node.name == 'default:snow' ) then
+					has_snow[     tostring(x)..':'..tostring(z) ] = true; -- any value would do here; just has to be defined
+					-- place snow as a marker one below the building
+					minetest.swap_node(     {x=x, y=(start_pos.y-2), z=z}, {name='default:dirt_with_snow'});
+				-- read the marker (the building might have been placed once already)
+				elseif( node2 and node2.name and node2.name == 'default:dirt_with_snow' ) then
+					has_snow[     tostring(x)..':'..tostring(z) ] = true; 
+				end
+			end
+		end
+					
 --		print( 'PLACED BUILDING '..tostring( binfo.scm )..' AT '..minetest.pos_to_string( pos )..'. Max. size: '..tostring( max_xz )..' grows: '..tostring(fruit));
 		-- force placement (we want entire buildings)
 		minetest.place_schematic( start_pos, mts_path..binfo.scm..'.mts', tostring( rotation ), replacements, true);
-
-		-- TODO: add snow on roofs and roof-slabs and stairs
 
 		-- call on_construct for all the nodes that require it (i.e. furnaces)
 		for i, v in ipairs( binfo.on_constr ) do
@@ -695,33 +718,65 @@ mg_village_place_one_schematic = function( bpos, replacements, pos, mts_path )
 		end
 
 		-- note: after_place_node is not handled here because we do not have a player at hand that could be used for it
-	end
---[[ -- TODO
-	-- add snowblocks on snow nodes; this needs to be done for .mts and .we files alike;
- 	-- this also changes the grass type for those nodes that do not have a fitting type
-	if( dirt_with_grass_replacement and pos.btype ~= 'road' and binfo.is_mts == 1) then -- TODO
 
-		if( dirt_with_grass_replacement == 'default:dirt_with_snow' ) then
-			cover = 'default:snow';
-		else
-			cover = nil;
-		end
-		local nodes = minetest.find_nodes_in_area( start_pos, end_pos, {'default:dirt','default:dirt_with_grass','default:dirt_with_snow','mg:dirt_with_dry_grass'});
-		for _, p in ipairs(nodes) do
-			local above = minetest.get_node( { x=p.x, y=p.y+1, z=p.z } );
-			if( cover and above and above.name and above.name == 'air' ) then
-				minetest.set_node( {x=p.x, y=p.y+1, z=p.z}, { name=cover} );
+		-- evry dirt_with_grass node gets replaced with the grass type at that location
+		-- (as long as it was something else than dirt_with_grass)
+		local dirt_nodes = minetest.find_nodes_in_area( start_pos, end_pos, {'default:dirt_with_grass'} );
+		for _,p in ipairs( dirt_nodes ) do
+			local new_type = ground_types[ tostring( p.x )..':'..tostring( p.z ) ];
+			if( new_type ) then
+				minetest.set_node( p, { name = new_type } );
 			end
-			-- adjust the surface grass for .we files
-			if( not( binfo.is_mts == 1 ) and binfo.yoff < 1) then
-				local n     = minetest.get_node( p );
-				if( n and n.name and n.name ~= dirt_with_grass_replacement and dirt_with_grass_replacement) then
-					minetest.set_node( p, { name = dirt_with_grass_replacement } );
+		end
+
+		-- TODO: add snow on roofs, slabs, stairs, fences, ...
+		for x = start_pos.x, end_pos.x do
+			for z = start_pos.z, end_pos.z do
+				if( moresnow and moresnow.suggest_snow_type and has_snow[ tostring(x)..':'..tostring(z) ] ) then
+
+					local node_above = minetest.get_node( {x=x, y=end_pos.y+1, z=z });
+					local node_below = nil;
+					local y = end_pos.y;
+					while( y >= start_pos.y ) do
+						if( node_above and node_above.name and node_above.name == 'air') then
+							node_below = minetest.get_node( {x=x, y=y, z=z});	
+							if(    node_below and node_below.name and node_below.name ~= 'ignore' and node_below.name ~= 'air' ) then
+								local drop = minetest.registered_nodes[ node_below.name ];
+								if( drop and drop.drop and type( drop.drop )=='string') then
+									drop = drop.drop;
+								end
+								if( node_below.name ~= 'default:snow' and node_below.name ~= 'default:gravel' and drop ~= 'default:snow') then
+									-- finished; do not try to place any more snow
+									local suggested = moresnow.suggest_snow_type( minetest.get_content_id( node_below.name ), node_below.param2 );
+									if( suggested.new_id == moresnow.c_snow_top or suggested.new_id==moresnow.c_snow_fence) then	
+										local node_below2 = minetest.get_node( {x=x, y=y-1, z=z});
+										if( node_below2 and node_below2.name and node_below2 ~= 'ignore' and node_below2 ~= 'air' ) then
+											local suggested2 = moresnow.suggest_snow_type( minetest.get_content_id( node_below2.name ), node_below2.param2 );
+											if( suggested2.new_id == moresnow.c_snow ) then
+												minetest.swap_node( {x=x, y=y+1, z=z}, --{ name = 'default:snow' } );
+													{ name=minetest.get_name_from_content_id( suggested.new_id ), param2=suggested.param2 });
+											end
+										end
+									-- it is possible that this is not the right shape; if so, the snow will continue to fall down
+									elseif( suggested.new_id ~= moresnow.c_ignore ) then
+											
+										minetest.swap_node( {x=x, y=y+1, z=z}, --{ name = 'default:snow' } );
+											{ name= minetest.get_name_from_content_id( suggested.new_id ), param2=suggested.param2 });
+										-- we have dropped the snow; end the loop
+									end
+								end
+								y = start_pos.y-1;
+							end
+						end
+						y = y-1;
+						node_above = node_below;
+					end
+
 				end
 			end
 		end
-	end	
---]]
+	end
+
 	-- save the dirt_with_grass_replacement choosen for this particular building in the village data
 	pos.grass_type = dirt_with_grass_replacement;
 
