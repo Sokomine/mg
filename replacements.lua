@@ -225,6 +225,8 @@ nvillages.get_replacement_list = function( housetype, pr )
       if( roof_type ) then
          table.insert( replacements, {'stairs:stair_junglewood',          'cottages:roof_connector_'..roof_type });
          table.insert( replacements, {'stairs:slab_junglewood',           'cottages:roof_flat_'..roof_type });
+         table.insert( replacements, {'cottages:roof_connector_wood',     'cottages:roof_connector_'..roof_type });
+         table.insert( replacements, {'cottages:roof_flat_wood',          'cottages:roof_flat_'..roof_type });
       end
       return replacements;
    end
