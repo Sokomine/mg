@@ -3,14 +3,18 @@
 
 mg.mg_village_sizes = {
 	nore         = { min = 20, max = 40,   texture = 'default_stone_brick.png'},
-	taoki        = { min = 40, max = 90,   texture = 'default_brick.png' },
-	medieval     = { min = 25, max = 60,   texture = 'cottages_darkage_straw.png'}, -- they often have straw roofs
+	taoki        = { min = 30, max = 70,   texture = 'default_brick.png' },
+--	medieval     = { min = 25, max = 60,   texture = 'cottages_darkage_straw.png'}, -- they often have straw roofs
+	medieval     = { min = 50, max = 60,   texture = 'cottages_darkage_straw.png'}, -- TODO: increased for easier testing
 	charachoal   = { min = 10, max = 15,   texture = 'default_coal_block.png'},
 	lumberjack   = { min = 10, max = 30,   texture = 'default_tree.png'},
 	claytrader   = { min = 10, max = 20,   texture = 'default_clay.png'},
 	logcabin     = { min = 15, max = 30,   texture = 'default_wood.png'},
 	canadian     = { min = 40, max = 110,  texture = 'wool_white.png'},
 }
+
+-- if set to true, the outer buildings in medieval villages will be fields; this is not very convincing yet
+mg.medieval_subtype = false;
 
 buildings = {
 
@@ -59,6 +63,7 @@ buildings = {
 
 -- schematics from Sokomines villages mod (requires cottages)
 	{scm="church_1",        yoff= 0, orients={0}, farming_plus=0, avoid='', typ='church',    weight={medieval=4}, pervillage=1},    
+--	{scm="church_2_twoelk", yoff= 0, orients={0}, farming_plus=0, avoid='', typ='church',    weight={medieval=4}, pervillage=1},    
 	{scm="forge_1",         yoff= 0, orients={0}, farming_plus=0, avoid='', typ='forge',     weight={medieval=2}, pervillage=1},
 	{scm="mill_1",          yoff= 0, orients={0}, farming_plus=0, avoid='', typ='mill',      weight={medieval=2}, pervillage=1},
 	{scm="hut_1",           yoff= 0, orients={0}, farming_plus=0, avoid='', typ='hut',       weight={medieval=1}},
@@ -213,6 +218,12 @@ buildings = {
 	{scm="r_rowhouses",                yoff=  1, orients={2}, farming_plus=0, avoid='',     typ='ladymacbeth',  weight={canadian=4},},
 	{scm="r_manorhouse",               yoff=  1, orients={0}, farming_plus=0, avoid='',     typ='ladymacbeth',  weight={canadian=3},},
 	{scm="r_triplex",                  yoff=  1, orients={0}, farming_plus=0, avoid='',     typ='ladymacbeth',  weight={canadian=3},},
+
+	{scm="field_1",         yoff=-2, orients={0,1,2,3}, farming_plus=0, avoid='',        typ='field',    weight={fields=1}},
+	{scm="field_2",         yoff=-2, orients={0,1,2,3}, farming_plus=0, avoid='',        typ='field',    weight={fields=1}},
+	{scm="field_3",         yoff=-2, orients={0,1,2,3}, farming_plus=0, avoid='',        typ='field',    weight={fields=1}},
+	{scm="field_4",         yoff=-2, orients={0,1,2,3}, farming_plus=0, avoid='',        typ='field',    weight={fields=1}},
+
 }
 
 
@@ -366,6 +377,7 @@ buildings["wall"] = {yoff = 1, ysize = 6, scm = wall}
 --end
 
 
+mg_village_types[ #mg_village_types ] = 'fields';
 for j,v in ipairs( mg_village_types ) do
 	
 	local total_weight = 0
@@ -385,3 +397,5 @@ for j,v in ipairs( mg_village_types ) do
 		end
 	end
 end
+-- the fields do not exist as an independent type
+mg_village_types[ #mg_village_types ] = nil;

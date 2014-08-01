@@ -198,7 +198,11 @@ local function generate_road(village, l, pr, roadsize, rx, rz, rdx, rdz, vnoise)
 					exitloop = true
 					break
 				end
-				btype, rotation, bsizex, bsizez = choose_building_rot(l, pr, orient1, village_type)
+				local village_type_sub = village_type;
+				if( mg.medieval_subtype and village_type_sub == 'medieval' and math.abs(village.vx-rx)>20 and math.abs(village.vz-rz)>20) then
+					village_type_sub = 'fields';
+				end
+				btype, rotation, bsizex, bsizez = choose_building_rot(l, pr, orient1, village_type_sub)
 				bx = rx + math.abs(rdz)*(roadsize+1) - when(rdx==-1, bsizex-1, 0)
 				bz = rz + math.abs(rdx)*(roadsize+1) - when(rdz==-1, bsizez-1, 0)
 				if placeable(bx, bz, bsizex, bsizez, l) and inside_village2(bx, bsizex, bz, bsizez, village, vnoise) then
@@ -243,7 +247,11 @@ local function generate_road(village, l, pr, roadsize, rx, rz, rdx, rdz, vnoise)
 					exitloop = true
 					break
 				end
-				btype, rotation, bsizex, bsizez = choose_building_rot(l, pr, orient2, village_type)
+				local village_type_sub = village_type;
+				if( mg.medieval_subtype and village_type_sub == 'medieval' and math.abs(village.vx-rx)>(village.vs/3) and math.abs(village.vz-rz)>(village.vs/3)) then
+					village_type_sub = 'fields';
+				end
+				btype, rotation, bsizex, bsizez = choose_building_rot(l, pr, orient2, village_type_sub)
 				bx = rx - math.abs(rdz)*(bsizex+roadsize) - when(rdx==-1, bsizex-1, 0)
 				bz = rz - math.abs(rdx)*(bsizez+roadsize) - when(rdz==-1, bsizez-1, 0)
 				if placeable(bx, bz, bsizex, bsizez, l) and inside_village2(bx, bsizex, bz, bsizez, village, vnoise) then
