@@ -20,8 +20,35 @@ mg.map_of_world = function( pname )
 			"label[0,10;|]"..
 			"label[0.2,10;->]";
 
+
 	local r  = mg.MAP_RANGE;
 	local f1 = 10/(2*r);
+
+	local map_tiles_shown = math.floor( mg.MAP_RANGE/80 );
+	local center_x = math.floor( ppos.x/80 );
+	local center_z = math.floor( ppos.z/80 );
+	for x = center_x - map_tiles_shown, center_x + map_tiles_shown do
+		for z = center_z - map_tiles_shown, center_z + map_tiles_shown do  
+			if( mg.mg_generated_map[ x ] and mg.mg_generated_map[ x ][ z ] ) then
+				local surface_node_name = minetest.get_name_from_content_id( mg.mg_generated_map[ x ][ z ]);
+				local surface_node_def  = minetest.registered_nodes[ surface_node_name ];
+				local tiles             = surface_node_def.tiles;
+				local tile = nil;
+				if( tiles ~= nil ) then
+					tile = tiles[1];
+				end
+                                if type(tile)=="table" then
+                                	tile=tile["name"]
+				end
+
+				local x1 = f1 * ((x*80) - ppos.x +r);
+				local z1 = f1 * ( (2*r) - ((z*80) - ppos.z + r));
+				local d  = f1 * 80 * 1.25;
+				formspec = formspec.."image["..tostring(x1)..",".. tostring(z1) ..";"..d..','..d..";" .. tile .."]";
+			end
+		end
+	end
+
 	local shown_villages = {};
 
 	for name,v in pairs( mg.mg_all_villages ) do

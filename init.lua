@@ -1,10 +1,12 @@
 mg = {}
 
-mg.mg_all_villages = {}
+mg.mg_all_villages  = {}
+mg.mg_generated_map = {}
 mg.anz_villages = 0;
 
 dofile(minetest.get_modpath(minetest.get_current_modname()).."/save_restore.lua")
-mg.restore_data(); -- read mg.mg_all_villages data saved for this world from previous runs
+mg.mg_all_villages  = save_restore.restore_data( 'mg_all_villages.data' ); -- read mg.mg_all_villages data saved for this world from previous runs
+mg.mg_generated_map = save_restore.restore_data( 'mg_generated_map.data' );
 
 -- adds a command that allows to teleport to a known village
 dofile(minetest.get_modpath(minetest.get_current_modname()).."/chat_commands.lua")
@@ -54,6 +56,7 @@ c_grasses = {c_grass_1, c_grass_2, c_grass_3, c_grass_4, c_grass_5}
 c_jungle_grass  = minetest.get_content_id("default:junglegrass")
 c_dry_shrub  = minetest.get_content_id("default:dry_shrub")
 c_papyrus  = minetest.get_content_id("default:papyrus")
+c_gravel   = minetest.get_content_id("default:gravel" )
 
 minetest.register_on_mapgen_init(function(mgparams)
 		minetest.set_mapgen_params({mgname = "singlenode", flags = "nolight"})
@@ -433,6 +436,7 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 	
 	local vcr = VILLAGE_CHECK_RADIUS
 	local villages = {}
+	local generate_new_villages = true;
 	for xi = -vcr, vcr do
 	for zi = -vcr, vcr do
 		for _, village in ipairs(villages_at_point({x = minp.x + xi * 80, z = minp.z + zi * 80}, noise1raw)) do
@@ -445,6 +449,7 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 			local village_id = tostring( village.vx )..':'..tostring( village.vz );
 			if( mg.mg_all_villages and mg.mg_all_villages[ village_id ]) then
 				villages[ v_nr ] = mg.mg_all_villages[ village_id ];
+				generate_new_villages = false;
 			end
 		end
 	end
@@ -470,6 +475,19 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 	local data = vm:get_data()
 	local param2_data = vm:get_param2_data()
 
+	local last_counted_surface    = c_dirt;
+	local count_surface_materials = {};
+	count_surface_materials[ c_ice   ] = 0;
+	count_surface_materials[ c_water ] = 0;
+	count_surface_materials[ c_dirt  ] = 0;
+	count_surface_materials[ c_dry_grass   ] = 0;
+	count_surface_materials[ c_grass       ] = 0;
+	count_surface_materials[ c_sand        ] = 0;
+	count_surface_materials[ c_desert_sand ] = 0;
+	count_surface_materials[ c_dirt_snow   ] = 0;
+	count_surface_materials[ c_snowblock   ] = 0;
+	count_surface_materials[ c_air         ] = 0;
+	count_surface_materials[ c_snow        ] = 0;
 	local ni = 1
 	local above_top
 	local liquid_top
@@ -543,10 +561,15 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 				local vi = a:index(x, y, z)
 				if y >= 0 then
 					data[vi] = top
+					count_surface_materials[ top       ] = count_surface_materials[ top       ] + 1;
+					last_counted_surface = top;
 				else
 					data[vi] = top_layer
+					count_surface_materials[ top_layer ] = count_surface_materials[ top_layer ] + 1;
+					last_counted_surface = top_layer;
 				end
 		end
+
 		local add_above_top = true
 		for id, tree in ipairs(mg.registered_trees) do
 			if tree.min_humidity <= humidity and humidity <= tree.max_humidity
@@ -559,7 +582,10 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 					local in_village = false
 					for _, village in ipairs(villages) do
 						if inside_village(x, z, village, village_noise) and not tree.can_be_in_village then
-							village.to_grow[#village.to_grow+1] = {x = x, y = y + 1, z = z, id = id}
+							if( generate_new_villages ) then
+								village.to_grow[#village.to_grow+1] = {x = x, y = y + 1, z = z, id = id}
+--print('ADDING a tree inside a village at '..minetest.serialize( {x = x, y = y + 1, z = z, id = id} ));
+							end
 							in_village = true
 							break
 						end
@@ -582,6 +608,10 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 			end
 			if maxp.y>=0 then
 				data[a:index(x, 0, z)] = liquid_top
+				
+				-- previously, we did count the ocean floor
+				count_surface_materials[ last_counted_surface ] = count_surface_materials[ last_counted_surface ] - 1;
+				count_surface_materials[ liquid_top           ] = count_surface_materials[ liquid_top           ] + 1;
 			end
 		end
 		local tl = math.floor((noise_top_layer[ni]+2.5)*2)
@@ -606,6 +636,31 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 		end
 	end
 	end
+
+
+	local curr_surface_max = 0;
+	local curr_surface_mat = c_dirt;
+	local all_surface_nodes = 0;
+	for k, v in pairs( count_surface_materials ) do
+		if( v > curr_surface_max ) then
+			curr_surface_max = v;
+			curr_surface_mat = k;
+		end
+		all_surface_nodes = all_surface_nodes + v;
+	end
+	-- store information about already generated mapchunks; but only if there is any surface worth speaking off;
+	-- chunks that are below ground are ignored entirely
+	if( maxp.y>0 and all_surface_nodes > 1800 and curr_surface_max > 100 ) then 
+		-- the map extends about 32000 blocks in each direction from the center; thus, if we map only 1/80 of that, 800x800 fields are enough
+		-- a two-dimensional array is easier to handle later on than a computed index
+		local x_index = math.floor( minp.x/80 );
+		if( not( mg.mg_generated_map[ x_index ] )) then
+			mg.mg_generated_map[ x_index ] = {};
+		end
+		mg.mg_generated_map[ x_index ][ math.floor( minp.z/80 ) ] = curr_surface_mat;
+		save_restore.save_data( 'mg_generated_map.data', mg.mg_generated_map );
+	end
+			
 	
 	local va = VoxelArea:new{MinEdge=minp, MaxEdge=maxp}
 	
@@ -721,7 +776,7 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 			mg.mg_all_villages[ village_id ] = minetest.deserialize( minetest.serialize( village ));
 
 			print("Village No. "..tostring( count ).." of type \'"..tostring( village.village_type ).."\' of size "..tostring( village.vs ).." spawned at: x = "..village.vx..", z = "..village.vz)
-			mg.save_data(); -- store mg.mg_all_villages on disk
+			save_restore.save_data( 'mg_all_villages.data', mg.mg_all_villages );
 		end
 	end
 end
