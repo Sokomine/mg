@@ -1,8 +1,8 @@
 
-nvillages = {}
 
+-- only the function mg_villages.get_replacement_table(..) is called from outside this file
 
-nvillages.replace_materials = function( replacements, pr, original_materials, prefixes, materials, old_material )
+mg_villages.replace_materials = function( replacements, pr, original_materials, prefixes, materials, old_material )
 	
 	local known_materials = {};
 	local wood_found = false;
@@ -48,7 +48,7 @@ nvillages.replace_materials = function( replacements, pr, original_materials, pr
 end
 
 -- replace the tree trunk as well so that it fits to the wood type
-nvillages.replace_tree_trunk = function( replacements, wood_type )
+mg_villages.replace_tree_trunk = function( replacements, wood_type )
 	if(     wood_type == 'default:junglewood' ) then
 		table.insert( replacements, {'default:tree',  'default:jungletree'});
 	elseif( wood_type == 'mg:savannawood' ) then
@@ -70,7 +70,7 @@ end
 -- at least the cottages may come in a variety of building materials
 -- IMPORTANT: don't add any nodes which have on_construct here UNLESS they where in the original file already
 --            on_construct will only be called for known nodes that need that treatment (see villages.analyze_mts_file and on_constr)
-nvillages.get_replacement_list = function( housetype, pr )
+mg_villages.get_replacement_list = function( housetype, pr )
 
    local replacements = {};
 
@@ -83,7 +83,7 @@ nvillages.get_replacement_list = function( housetype, pr )
    if( housetype == 'taoki' ) then  
 
       -- the main body of the houses in the .mts files is made out of wood
-      local wood_type = nvillages.replace_materials( replacements, pr,
+      local wood_type = mg_villages.replace_materials( replacements, pr,
 		{'default:wood'},
 		{''},
 		{'default:wood', 'default:junglewood', 'mg:pinewood', 'mg:savannawood',
@@ -92,17 +92,17 @@ nvillages.get_replacement_list = function( housetype, pr )
 		'default:coalblock','default:steelblock','default:goldblock', 'default:bronzeblock', 'default:copperblock', 'wool:white'},
 		'default:wood');
       -- tree trunks are seldom used in these houses; let's change them anyway
-      nvillages.replace_tree_trunk( replacements, wood_type );
+      mg_villages.replace_tree_trunk( replacements, wood_type );
 		
       -- all this comes in variants for stairs and slabs as well
-      nvillages.replace_materials( replacements, pr,
+      mg_villages.replace_materials( replacements, pr,
 		{'stairs:stair_stonebrick',  'stairs:slab_stonebrick', 'default:stonebrick'},
 		{'stairs:stair_',            'stairs:slab_',           'default:'          },
 		{ 'stonebrick', 'stone', 'sandstone', 'cobble'},
 		'stonebrick');
 
       -- decorative slabs above doors etc.
-      nvillages.replace_materials( replacements, pr,
+      mg_villages.replace_materials( replacements, pr,
 		{'stairs:stair_wood'},
 		{'stairs:stair_'},
 		{'stonebrick', 'stone', 'sandstone', 'cobble', 'wood', 'junglewood' },
@@ -110,7 +110,7 @@ nvillages.get_replacement_list = function( housetype, pr )
 
       -- brick roofs are a bit odd; but then...
       -- all three shapes of roof parts have to fit together
-      nvillages.replace_materials( replacements, pr,
+      mg_villages.replace_materials( replacements, pr,
 		{'stairs:stair_brick',  'stairs:slab_brick', 'default:brick'},
 		{'stairs:stair_',       'stairs:slab_',      'default:'     },
 		{ 'brick', 'stone', 'cobble', 'stonebrick', 'wood', 'junglewood', 'sandstone' },
@@ -122,19 +122,19 @@ nvillages.get_replacement_list = function( housetype, pr )
 
    if( housetype == 'nore' ) then
 
-      nvillages.replace_materials( replacements, pr,
+      mg_villages.replace_materials( replacements, pr,
 		{'stonebrick'},
 		{'default:'},
 		{'stonebrick', 'desert_stonebrick','sandstonebrick', 'sandstone','stone','desert_stone'},
 		'stonebrick');
 
       -- replace the wood as well
-      local wood_type = nvillages.replace_materials( replacements, pr,
+      local wood_type = mg_villages.replace_materials( replacements, pr,
 		{'default:wood'},
 		{''},
 		{ 'default:wood', 'default:junglewood', 'mg:savannawood', 'mg:pinewood' },
 		'default:wood');
-      nvillages.replace_tree_trunk( replacements, wood_type );
+      mg_villages.replace_tree_trunk( replacements, wood_type );
 
       if( pr:next(1,3)==1 ) then
          table.insert( replacements, {'default:glass', 'default:obsidian_glass'});
@@ -147,12 +147,12 @@ nvillages.get_replacement_list = function( housetype, pr )
    if( housetype == 'lumberjack' ) then
 
       -- replace the wood - those are lumberjacks after all
-      local wood_type = nvillages.replace_materials( replacements, pr,
+      local wood_type = mg_villages.replace_materials( replacements, pr,
 		{'default:wood'},
 		{''},
 		{ 'default:wood', 'default:junglewood', 'mg:savannawood', 'mg:pinewood' },
 		'default:wood');
-      nvillages.replace_tree_trunk( replacements, wood_type );
+      mg_villages.replace_tree_trunk( replacements, wood_type );
 
       return replacements;
    end
@@ -216,7 +216,7 @@ nvillages.get_replacement_list = function( housetype, pr )
    if( housetype == 'logcabin' ) then
 
       -- for logcabins, wood is the most likely type of roof material
-      local roof_type = nvillages.replace_materials( replacements, pr,
+      local roof_type = mg_villages.replace_materials( replacements, pr,
 		{'stairs:stair_cobble',      'stairs:slab_cobble' },
 		{'cottages:roof_connector_', 'cottages:roof_flat_' },
 		{'straw', 'wood',  'wood', 'wood', 'reet', 'slate', 'red', 'brown', 'black'},
@@ -249,21 +249,21 @@ nvillages.get_replacement_list = function( housetype, pr )
 
    if( housetype == 'claytrader' ) then
       -- the walls of the clay trader houses are made out of brick
-      nvillages.replace_materials( replacements, pr,
+      mg_villages.replace_materials( replacements, pr,
 		{ 'stairs:stair_brick', 'stairs:slab_brick', 'default:brick' }, -- default_materials
 		{ 'stairs:stair_',      'stairs:slab_',      'default:'      }, -- prefixes (for new materials)
 		{ 'brick', 'stone', 'sandstone', 'sandstonebrick', 'desert_stone', 'desert_cobble', 'desert_stonebrick' }, -- new materials
 		'brick' ); -- original material
 	
       -- material for the floor
-      nvillages.replace_materials( replacements, pr,
+      mg_villages.replace_materials( replacements, pr,
 		{'default:stone'},
 		{'default:'},
 		{ 'brick', 'stone', 'sandstone', 'sandstonebrick', 'clay', 'desert_stone', 'desert_cobble', 'desert_stonebrick' },
 		'stone');
 
       -- the clay trader homes come with stone stair roofs; slabs are used in other places as well (but those replacements here are ok)
-      nvillages.replace_materials( replacements, pr,
+      mg_villages.replace_materials( replacements, pr,
 		{'stairs:stair_stone',       'stairs:slab_stone' },
 		{'cottages:roof_connector_', 'cottages:roof_flat_' },
 		{'straw', 'straw', 'straw', 'straw', 'straw',
@@ -276,7 +276,7 @@ nvillages.get_replacement_list = function( housetype, pr )
 		'');
 
       -- hills and pits that contain the materials clay traders dig for
-      nvillages.replace_materials( replacements, pr,
+      mg_villages.replace_materials( replacements, pr,
 		{'default:stone_with_coal'},
 		{'default:'},
 		{'sand', 'sandstone', 'clay'},
@@ -316,7 +316,7 @@ nvillages.get_replacement_list = function( housetype, pr )
                       'mg:pinewood',    'mg:pinewood',    'mg:pinewood',    'mg:pinewood' };
 
    -- what is sandstone (the floor) may be turned into something else
-   local mfs = nvillages.replace_materials( replacements, pr,
+   local mfs = mg_villages.replace_materials( replacements, pr,
 	{'default:sandstone'},
 	{''},
 	materials,
@@ -338,17 +338,17 @@ nvillages.get_replacement_list = function( housetype, pr )
    table.insert( materials, 'default:glass' );
 
    -- bottom part of the house (usually ground floor from outside)
-   local replace_clay = nvillages.replace_materials( replacements, pr,
+   local replace_clay = mg_villages.replace_materials( replacements, pr,
 	{'default:clay'},
 	{''},
 	materials,
 	'default:clay');
    if( replace_clay and replace_clay ~= 'default:clay' ) then
-      nvillages.replace_tree_trunk( replacements, wood_type );
+      mg_villages.replace_tree_trunk( replacements, wood_type );
    end
  
    -- upper part of the house (may be the same as the material for the lower part)
-   nvillages.replace_materials( replacements, pr,
+   mg_villages.replace_materials( replacements, pr,
 	{'cottages:loam'},
 	{''},
 	materials,
@@ -357,7 +357,7 @@ nvillages.get_replacement_list = function( housetype, pr )
 
    -- replace cobble; for these nodes, a stony material is needed (used in wells as well)
    -- mossycobble is fine here as well
-   local mcs = nvillages.replace_materials( replacements, pr,
+   local mcs = mg_villages.replace_materials( replacements, pr,
 		{'default:cobble'},
 		{'default:'},
 		{'sandstone', 'desert_stone', 'desert_cobble',
@@ -379,7 +379,7 @@ nvillages.get_replacement_list = function( housetype, pr )
  
 
    -- straw is the most likely building material for roofs for historical buildings
-   nvillages.replace_materials( replacements, pr,
+   mg_villages.replace_materials( replacements, pr,
 		-- all three shapes of roof parts have to fit together
 		{ 'cottages:roof_straw',    'cottages:roof_connector_straw',   'cottages:roof_flat_straw' },
 		{ 'cottages:roof_',         'cottages:roof_connector_',        'cottages:roof_flat_'},
@@ -397,10 +397,10 @@ end
 
 
 -- Translate replacement function from above (which aims at place_schematic) for the villages in Nores mapgen
-nvillages.get_replacement_ids = function( housetype, pr )
+mg_villages.get_replacement_ids = function( housetype, pr )
 
 	local replace = {};
-	local replacements = nvillages.get_replacement_list( housetype, pr );
+	local replacements = mg_villages.get_replacement_list( housetype, pr );
 	for i,v in ipairs( replacements ) do
 		if( v and #v == 2 ) then
 			replace[ minetest.get_content_id( v[1] )] = minetest.get_content_id( v[2] );
@@ -412,12 +412,12 @@ end
 
 
 -- mapgen based replacements work best using a table, while minetest.place_schematic(..) based spawning needs a list
-nvillages.get_replacement_table = function( housetype, pr, replacements )
+mg_villages.get_replacement_table = function( housetype, pr, replacements )
 
 	local rtable = {};
 	local ids    = {};
 	if( not( replacements )) then
-		replacements = nvillages.get_replacement_list( housetype, pr );
+		replacements = mg_villages.get_replacement_list( housetype, pr );
 	end
 	for i,v in ipairs( replacements ) do
 		if( v and #v == 2 ) then

@@ -24,7 +24,7 @@ local function is_village_block(minp)
 	return (x%vcc == 0) and (z%vcc == 0)
 end
 
-function villages_at_point(minp, noise1)
+mg_villages.villages_at_point = function(minp, noise1)
 	if not is_village_block(minp) then return {} end
 	local vcr, vcc = VILLAGE_CHECK_RADIUS, VILLAGE_CHECK_COUNT
 	-- Check if there's another village nearby
@@ -49,16 +49,16 @@ function villages_at_point(minp, noise1)
 	-- fallback: type "nore" (that is what the mod originally came with)
 	local village_type = 'nore';
 	-- if this is the first village for this world, take a medieval one
-	if( (not( mg.mg_all_villages ) or mg.anz_villages < 1) and minetest.get_modpath("cottages") ) then
+	if( (not( mg_villages.all_villages ) or mg_villages.anz_villages < 1) and minetest.get_modpath("cottages") ) then
 		village_type = 'medieval';
 	else
-		village_type = mg_village_types[ pr:next(1, #mg_village_types )]; -- select a random type
+		village_type = mg_villages.village_types[ pr:next(1, #mg_villages.village_types )]; -- select a random type
 	end
 
-	if( not( mg.mg_village_sizes[ village_type ] )) then
-		mg.mg_village_sizes[ village_type ] = { min = VILLAGE_MIN_SIZE, max = VILLAGE_MAX_SIZE };
+	if( not( mg_villages.village_sizes[ village_type ] )) then
+		mg_villages.village_sizes[  village_type ] = { min = VILLAGE_MIN_SIZE, max = VILLAGE_MAX_SIZE };
 	end
-	local size = pr:next(mg.mg_village_sizes[ village_type ].min, mg.mg_village_sizes[ village_type ].max) 
+	local size = pr:next(mg_villages.village_sizes[ village_type ].min, mg_villages.village_sizes[ village_type ].max) 
 	local height = pr:next(5, 20)
 
 --	print("A village of type \'"..tostring( village_type ).."\' of size "..tostring( size ).." spawned at: x = "..x..", z = "..z)
@@ -199,7 +199,7 @@ local function generate_road(village, l, pr, roadsize, rx, rz, rdx, rdz, vnoise)
 					break
 				end
 				local village_type_sub = village_type;
-				if( mg.medieval_subtype and village_type_sub == 'medieval' and math.abs(village.vx-rx)>20 and math.abs(village.vz-rz)>20) then
+				if( mg_villages.medieval_subtype and village_type_sub == 'medieval' and math.abs(village.vx-rx)>20 and math.abs(village.vz-rz)>20) then
 					village_type_sub = 'fields';
 				end
 				btype, rotation, bsizex, bsizez = choose_building_rot(l, pr, orient1, village_type_sub)
@@ -248,7 +248,7 @@ local function generate_road(village, l, pr, roadsize, rx, rz, rdx, rdz, vnoise)
 					break
 				end
 				local village_type_sub = village_type;
-				if( mg.medieval_subtype and village_type_sub == 'medieval' and math.abs(village.vx-rx)>(village.vs/3) and math.abs(village.vz-rz)>(village.vs/3)) then
+				if( mg_villages.medieval_subtype and village_type_sub == 'medieval' and math.abs(village.vx-rx)>(village.vs/3) and math.abs(village.vz-rz)>(village.vs/3)) then
 					village_type_sub = 'fields';
 				end
 				btype, rotation, bsizex, bsizez = choose_building_rot(l, pr, orient2, village_type_sub)
@@ -387,7 +387,8 @@ end
 -- Note: This function modifies replacements.ids and replacements.table for each building
 --       as far as fruits are concerned. It needs to be called before placing a building
 --       which contains fruits.
-mg.get_fruit_replacements = function( replacements, fruit)
+-- The function might as well be a local one.
+mg_villages.get_fruit_replacements = function( replacements, fruit)
 
 	if( not( fruit )) then
 		return;
@@ -432,7 +433,8 @@ end
 
 
 -- either uses get_node_or_nil(..) or the data from voxelmanip
-mg.get_node_somehow = function( x, y, z, a, data, param2_data )
+-- the function might as well be local (only used by *.mg_drop_moresnow)
+mg_villages.get_node_somehow = function( x, y, z, a, data, param2_data )
 	if( a and data and param2_data ) then
 		return { content = data[a:index(x, y, z)], param2 = param2_data[a:index(x, y, z)] };
 	end
@@ -446,7 +448,7 @@ end
 
 
 -- "drop" moresnow snow on diffrent shapes; works for voxelmanip and node-based setting
-mg.mg_drop_moresnow = function( x, z, y_top, y_bottom, a, data, param2_data)
+mg_villages.mg_drop_moresnow = function( x, z, y_top, y_bottom, a, data, param2_data)
 
 	-- this only works if moresnow is installed
 	if( not( moresnow ) or not( moresnow.suggest_snow_type )) then
@@ -454,11 +456,11 @@ mg.mg_drop_moresnow = function( x, z, y_top, y_bottom, a, data, param2_data)
 	end
 
 	local y = y_top;
-	local node_above = mg.get_node_somehow( x, y+1, z, a, data, param2_data );	
+	local node_above = mg_villages.get_node_somehow( x, y+1, z, a, data, param2_data );	
 	local node_below = nil;
 	while( y >= y_bottom ) do
 
-		node_below = mg.get_node_somehow( x, y, z, a, data, param2_data );
+		node_below = mg_villages.get_node_somehow( x, y, z, a, data, param2_data );
 		if(     node_above.content == c_air
 		    and node_below.content ~= c_ignore
 		    and node_below.content ~= c_air ) then
@@ -479,7 +481,7 @@ mg.mg_drop_moresnow = function( x, z, y_top, y_bottom, a, data, param2_data)
 				-- c_snow_top and c_snow_fence can only exist when the node 2 below is a solid one
 				if(    suggested.new_id == moresnow.c_snow_top
 				    or suggested.new_id == moresnow.c_snow_fence) then	
-					local node_below2 = mg.get_node_somehow( x, y-1, z, a, data, param2_data);
+					local node_below2 = mg_villages.get_node_somehow( x, y-1, z, a, data, param2_data);
 					if(     node_below2.content ~= c_ignore
 					    and node_below2.content ~= c_air ) then
 						local suggested2 = moresnow.suggest_snow_type( node_below2.content, node_below2.param2 );
@@ -526,7 +528,7 @@ local function generate_building(pos, minp, maxp, data, param2_data, a, pr, extr
 
 	-- the fruit is set per building, not per village as the other replacements
 	if( binfo.farming_plus and binfo.farming_plus == 1 and pos.fruit ) then
-		mg.get_fruit_replacements( replacements, pos.fruit);
+		mg_villages.get_fruit_replacements( replacements, pos.fruit);
 	end
 
 	local c_ignore = minetest.get_content_id("ignore")
@@ -608,7 +610,7 @@ local function generate_building(pos, minp, maxp, data, param2_data, a, pr, extr
 			y_bottom = minp.y;
 		end
 		if( has_snow and ax >= minp.x and ax <= maxp.x and az >= minp.z and az <= maxp.z ) then
-			local res = mg.mg_drop_moresnow( ax, az, y_top, y_bottom, a, data, param2_data);
+			local res = mg_villages.mg_drop_moresnow( ax, az, y_top, y_bottom, a, data, param2_data);
 			if( res ) then
 				data[       a:index(ax, res.height, az)] = res.suggested.new_id;
 				param2_data[a:index(ax, res.height, az)] = res.suggested.param2;
@@ -623,7 +625,8 @@ end
 -- similar to generate_building, except that it uses minetest.place_schematic(..) instead of changing voxelmanip data;
 -- this has advantages for nodes that use facedir;
 -- the function is called AFTER the mapgen data has been written in init.lua
-mg_village_place_schematics = function( bpos, replacements, voxelarea, pr )
+-- Function is called from init.lua.
+mg_villages.place_schematics = function( bpos, replacements, voxelarea, pr )
 
 	local mts_path = minetest.get_modpath("mg").."/schems/";
 
@@ -647,7 +650,7 @@ mg_village_place_schematics = function( bpos, replacements, voxelarea, pr )
 
 			-- that function places schematics, adds snow where needed 
 			-- and the grass type used directly in the pos/bpos data structure
-			mg_village_place_one_schematic( bpos, replacements, pos, mts_path );
+			mg_villages.place_one_schematic( bpos, replacements, pos, mts_path );
 		end
 	end
 	--print('VILLAGE DATA: '..minetest.serialize( bpos ));
@@ -655,7 +658,8 @@ end
 
 
 -- also adds a snow layer for buildings spawned from .we files
-mg_village_place_one_schematic = function( bpos, replacements, pos, mts_path )
+-- function might as well be local
+mg_villages.place_one_schematic = function( bpos, replacements, pos, mts_path )
 
 	-- just for the record: count how many times this building has been placed already;
 	-- multiple placements are commen at chunk boundaries (may be up to 8 placements)
@@ -689,7 +693,7 @@ mg_village_place_one_schematic = function( bpos, replacements, pos, mts_path )
 
 		-- the fruit is set per building, not per village as the other replacements
 		if( binfo.farming_plus and binfo.farming_plus == 1 and pos.fruit ) then
-			mg.get_fruit_replacements( replacements, pos.fruit);
+			mg_villages.get_fruit_replacements( replacements, pos.fruit);
 		end
 
 		-- find out which ground types are used and where we need to place snow later on
@@ -749,7 +753,7 @@ mg_village_place_one_schematic = function( bpos, replacements, pos, mts_path )
 			for z = start_pos.z, end_pos.z do
 				if( moresnow and moresnow.suggest_snow_type and has_snow[ tostring(x)..':'..tostring(z) ] ) then
 
-					local res = mg.mg_drop_moresnow( x, z, end_pos.y, start_pos.y, nil, nil, nil );
+					local res = mg_villages.mg_drop_moresnow( x, z, end_pos.y, start_pos.y, nil, nil, nil );
 					if( res ) then
 						minetest.swap_node( {x=x, y=res.height, z=z}, 
 							{ name=minetest.get_name_from_content_id( res.suggested.new_id ), param2=res.suggested.param2 });
@@ -789,7 +793,7 @@ local function generate_walls(bpos, data, a, minp, maxp, vh, vx, vz, vs, vnoise)
 	end
 end
 
-function generate_village(village, minp, maxp, data, param2_data, a, vnoise, dirt_with_grass_replacement)
+mg_villages.generate_village = function(village, minp, maxp, data, param2_data, a, vnoise, dirt_with_grass_replacement)
 	local vx, vz, vs, vh = village.vx, village.vz, village.vs, village.vh
 	local village_type = village.village_type;
 	local seed = get_bseed({x=vx, z=vz})
@@ -837,7 +841,7 @@ village.to_grow = {}; -- TODO this is a temporal solution to avoid flying tree t
 	-- a changing replacement list would also be pretty confusing
 	local p = PseudoRandom(seed);
 	-- if the village is new, replacement_list is nil and a new replacement list will be created
-	local replacements = nvillages.get_replacement_table( village.village_type, p, replacement_list );
+	local replacements = mg_villages.get_replacement_table( village.village_type, p, replacement_list );
 
 	if( not( replacements.table )) then
 		replacements.table = {};

@@ -1,7 +1,8 @@
 
 minetest.register_privilege("mg_villages", { description = "Allows to teleport to villages via /vist <nr>", give_to_singleplayer = false});
 
-mg.list_villages_formspec = function( player, formname, fields )
+-- this function is only used for the chat command currently
+mg_villages.list_villages_formspec = function( player, formname, fields )
 
 	if( not( player ) or fields.quit) then
 		return
@@ -30,7 +31,7 @@ mg.list_villages_formspec = function( player, formname, fields )
 			'text,align=right]'..	-- #houses
                         'table[0.1,2.7;11.4,8.8;'..formname..';';
 
-	for k,v in pairs( mg.mg_all_villages ) do
+	for k,v in pairs( mg_villages.all_villages ) do
 
 		local dx = math.abs( v.vx - ppos.x );
 		local dz = math.abs( v.vz - ppos.z );
@@ -61,7 +62,7 @@ minetest.register_chatcommand( 'villages', {
 	description = "Shows a list of all known villages.",
 	privs = {},
 	func = function(name, param)
-		mg.list_villages_formspec( minetest.get_player_by_name( name ), "mg:village_list", {});
+		mg_villages.list_villages_formspec( minetest.get_player_by_name( name ), "mg:village_list", {});
         end
 });
 
@@ -84,7 +85,7 @@ minetest.register_chatcommand( 'visit', {
 		end
 
 		local nr = tonumber( param );
-		for id, v in pairs( mg.mg_all_villages ) do
+		for id, v in pairs( mg_villages.all_villages ) do
 			-- we have found the village
 			if( v and v.nr == nr ) then
 

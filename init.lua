@@ -1,12 +1,15 @@
 mg = {}
 
-mg.mg_all_villages  = {}
-mg.mg_generated_map = {}
-mg.anz_villages = 0;
+-- reserve namespace for the villages
+mg_villages = {}
+
+mg_villages.all_villages  = {}
+mg_villages.mg_generated_map = {}
+mg_villages.anz_villages = 0;
 
 dofile(minetest.get_modpath(minetest.get_current_modname()).."/save_restore.lua")
-mg.mg_all_villages  = save_restore.restore_data( 'mg_all_villages.data' ); -- read mg.mg_all_villages data saved for this world from previous runs
-mg.mg_generated_map = save_restore.restore_data( 'mg_generated_map.data' );
+mg_villages.all_villages  = save_restore.restore_data( 'mg_all_villages.data' ); -- read mg_villages.all_villages data saved for this world from previous runs
+mg_villages.mg_generated_map = save_restore.restore_data( 'mg_generated_map.data' );
 
 -- adds a command that allows to teleport to a known village
 dofile(minetest.get_modpath(minetest.get_current_modname()).."/chat_commands.lua")
@@ -439,7 +442,7 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 	local generate_new_villages = true;
 	for xi = -vcr, vcr do
 	for zi = -vcr, vcr do
-		for _, village in ipairs(villages_at_point({x = minp.x + xi * 80, z = minp.z + zi * 80}, noise1raw)) do
+		for _, village in ipairs(mg_villages.villages_at_point({x = minp.x + xi * 80, z = minp.z + zi * 80}, noise1raw)) do
 			village.to_grow = {}
 			villages[#villages+1] = village
 		end
@@ -447,8 +450,8 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 		local v_nr = 1;
 		for v_nr, village in ipairs(villages) do
 			local village_id = tostring( village.vx )..':'..tostring( village.vz );
-			if( mg.mg_all_villages and mg.mg_all_villages[ village_id ]) then
-				villages[ v_nr ] = mg.mg_all_villages[ village_id ];
+			if( mg_villages.all_villages and mg_villages.all_villages[ village_id ]) then
+				villages[ v_nr ] = mg_villages.all_villages[ village_id ];
 				generate_new_villages = false;
 			end
 		end
@@ -684,11 +687,11 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 		-- the map extends about 32000 blocks in each direction from the center; thus, if we map only 1/80 of that, 800x800 fields are enough
 		-- a two-dimensional array is easier to handle later on than a computed index
 		local x_index = math.floor( minp.x/80 );
-		if( not( mg.mg_generated_map[ x_index ] )) then
-			mg.mg_generated_map[ x_index ] = {};
+		if( not( mg_villages.mg_generated_map[ x_index ] )) then
+			mg_villages.mg_generated_map[ x_index ] = {};
 		end
-		mg.mg_generated_map[ x_index ][ math.floor( minp.z/80 ) ] = curr_surface_mat;
-		save_restore.save_data( 'mg_generated_map.data', mg.mg_generated_map );
+		mg_villages.mg_generated_map[ x_index ][ math.floor( minp.z/80 ) ] = curr_surface_mat;
+		save_restore.save_data( 'mg_generated_map.data', mg_villages.mg_generated_map );
 	end
 	
 	local va = VoxelArea:new{MinEdge=minp, MaxEdge=maxp}
@@ -738,9 +741,7 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 	end
 
 	for _, village in ipairs(villages) do
-		-- select a random type of village
---		village.village_type = mg_village_types[ (( village.vx + village.vz )%(#mg_village_types) )+1 ];
-		village.to_add_data = generate_village(village, minp, maxp, data, param2_data, a, village_noise, top_node)
+		village.to_add_data = mg_villages.generate_village(village, minp, maxp, data, param2_data, a, village_noise, top_node)
 	end
 
 	vm:set_data(data)
@@ -785,27 +786,27 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 		end
 
 		-- now add those buildings which are .mts files and need to be placed by minetest.place_schematic(...)
-		mg_village_place_schematics( village.to_add_data.bpos, village.to_add_data.replacements, a, pr );
+		mg_villages.place_schematics( village.to_add_data.bpos, village.to_add_data.replacements, a, pr );
 
-		if( not( mg.mg_all_villages )) then
-			mg.mg_all_villages = {};
+		if( not( mg_villages.all_villages )) then
+			mg_villages.all_villages = {};
 		end
 		-- unique id - there can only be one village at a given pair of x,z coordinates
 		local village_id = tostring( village.vx )..':'..tostring( village.vz );	
 		-- the village data is saved only once per village - and not whenever part of the village is generated
-		if( not( mg.mg_all_villages[ village_id ])) then
+		if( not( mg_villages.all_villages[ village_id ])) then
 
 			-- count how many villages we already have and assign each village a uniq number
 			local count = 1;
-			for _,v in pairs( mg.mg_all_villages ) do
+			for _,v in pairs( mg_villages.all_villages ) do
 				count = count + 1;
 			end
 			village.nr = count;
-			mg.anz_villages = count;
-			mg.mg_all_villages[ village_id ] = minetest.deserialize( minetest.serialize( village ));
+			mg_villages.anz_villages = count;
+			mg_villages.all_villages[ village_id ] = minetest.deserialize( minetest.serialize( village ));
 
 			print("Village No. "..tostring( count ).." of type \'"..tostring( village.village_type ).."\' of size "..tostring( village.vs ).." spawned at: x = "..village.vx..", z = "..village.vz)
-			save_restore.save_data( 'mg_all_villages.data', mg.mg_all_villages );
+			save_restore.save_data( 'mg_all_villages.data', mg_villages.all_villages );
 		end
 	end
 end
@@ -863,7 +864,7 @@ local function spawnplayer(player)
 	for bx = -20, 20 do
 	for bz = -20, 20 do
 		local minp = {x = -32 + 80 * bx, y = -32, z = -32 + 80 * bz}
-		for _, village in ipairs(villages_at_point(minp, noise1)) do
+		for _, village in ipairs(mg_villages.villages_at_point(minp, noise1)) do
 			if math.abs(village.vx) + math.abs(village.vz) < min_dist then
 				min_pos = {x = village.vx, y = village.vh + 2, z = village.vz}
 				min_dist = math.abs(village.vx) + math.abs(village.vz)

@@ -1,10 +1,10 @@
 
 
 -- villages up to this many nodes in each direction are shown on the map
-mg.MAP_RANGE = 1000;
+mg_villages.MAP_RANGE = 1000;
 
 
-mg.draw_tile = function( content_id, image, x, z, dx, dz )
+mg_villages.draw_tile = function( content_id, image, x, z, dx, dz )
 	if( not( image )) then
 		local node_name = minetest.get_name_from_content_id( content_id );
 		if( not( node_name )) then
@@ -24,11 +24,11 @@ mg.draw_tile = function( content_id, image, x, z, dx, dz )
 		end
 		image = tile;
 	end
-	return "image["..tostring(x+0.5)..",".. tostring(z-0.5) ..";"..dx..','..dz..";" .. image .."]";
+	return "image["..tostring(x)..",".. tostring(z) ..";"..dx..','..dz..";" .. image .."]";
 end
 
 
-mg.map_of_world = function( pname )
+mg_villages.map_of_world = function( pname )
 
 	local player = minetest.get_player_by_name( pname );
 	if( not( player )) then
@@ -45,16 +45,16 @@ mg.map_of_world = function( pname )
 			"label[0.2,10;->]";
 
 
-	local r  = mg.MAP_RANGE;
+	local r  = mg_villages.MAP_RANGE;
 	local f1 = 10/(2*r);
 
-	local map_tiles_shown = math.floor( mg.MAP_RANGE/80 );
+	local map_tiles_shown = math.floor( mg_villages.MAP_RANGE/80 );
 	local center_x = math.floor( ppos.x/80 );
 	local center_z = math.floor( ppos.z/80 );
 	for x = center_x - map_tiles_shown, center_x + map_tiles_shown do
 		for z = center_z - map_tiles_shown, center_z + map_tiles_shown do  
-			if( mg.mg_generated_map[ x ] and mg.mg_generated_map[ x ][ z ] ) then
-				local surface_types     = mg.mg_generated_map[ x ][ z ];
+			if( mg_villages.mg_generated_map[ x ] and mg_villages.mg_generated_map[ x ][ z ] ) then
+				local surface_types     = mg_villages.mg_generated_map[ x ][ z ];
 				local content_id        = 0;
 				if( type( surface_types )=='table' ) then
 					content_id      = surface_types[ 26 ];
@@ -67,17 +67,17 @@ mg.map_of_world = function( pname )
 				local dx = f1 * 80;
 				local dz = f1 * 80;
 
-				formspec = formspec..mg.draw_tile( content_id, nil, x1, z1, dx*1.25, dz*1.25 );
+				formspec = formspec..mg_villages.draw_tile( content_id, nil, x1+0.5, z1-0.5, dx*1.25, dz*1.25 );
 
 				-- if more detailed information is available, draw those tiles that differ from the most common tile
-				if( type( surface_types )=='table' ) then
+				if( type( surface_types )=='table' and false) then -- TODO: disabled for now
 					dx = dx/5;
 					dz = dz/5;
 					for i,v in ipairs( surface_types ) do
 						if( v ~= content_id ) then
 							local x2 = x1+( math.floor( (i-1)/5 )*dx); 
 							local z2 = z1+( math.floor( (i-1)%5 )*dz);
-							formspec = formspec..mg.draw_tile( v, nil, x2, z2, dx*1.3, dz*1.3);
+							formspec = formspec..mg_villages.draw_tile( v, nil, x2+0.5, z2-0.5, dx*1.3, dz*1.3);
 						end
 					end
 				end
@@ -87,14 +87,18 @@ mg.map_of_world = function( pname )
 
 	local shown_villages = {};
 
-	for name,v in pairs( mg.mg_all_villages ) do
+	r  = mg_villages.MAP_RANGE;
+	f1 = 10/(2*r);
+	for name,v in pairs( mg_villages.all_villages ) do
 
 		local data = v; --minetest.deserialize( v );
 		local x = data.vx - ppos.x;
 		local z = data.vz - ppos.z;
 
-		-- show only villages which are at max mg.MAP_RANGE away from player
-		if( x and z and image
+		-- show only villages which are at max mg_villages.MAP_RANGE away from player
+		if( x and z 
+		   and mg_villages.village_sizes[ data.village_type ]
+		   and mg_villages.village_sizes[ data.village_type ].texture
 		   and math.abs( x ) < r
 		   and math.abs( z ) < r ) then
 
@@ -111,7 +115,7 @@ mg.map_of_world = function( pname )
 			z = f1 * ( (2*r) -(z+r));
 
 			formspec = formspec..
-				"label["..x..",".. z ..";"..tostring( data.nr ).."]"..mg.draw_tile( nil,  mg.mg_village_sizes[ data.village_type ].texture, x, z, dx, dz );
+				"label["..x..",".. z ..";"..tostring( data.nr ).."]"..mg_villages.draw_tile( nil,  mg_villages.village_sizes[ data.village_type ].texture, x, z, dx, dz );
 
 			shown_villages[ #shown_villages+1 ] = tostring( data.nr )..". "..tostring( name ).."]"; -- TODO: use real village name
 		end
@@ -150,7 +154,7 @@ mg.map_of_world = function( pname )
 	local i = 0.05;
 	formspec = formspec.."label[10,-0.4;Village types:]";
 	-- explain the meaning of the textures
-	for typ,data in pairs(mg.mg_village_sizes) do
+	for typ,data in pairs(mg_villages.village_sizes) do
 		formspec = formspec.."label[10.5,"..tostring(i)..";"..tostring( typ ).."]"..
 			             "image[10.0,"..tostring(i+0.1)..";0.4,0.4;"..tostring( data.texture ).."]";
 		i = i+0.45;
@@ -172,10 +176,10 @@ end
 
 
 minetest.register_chatcommand( 'vmap', {
-	description = "Shows a map of all known villages withhin "..tostring( mg.MAP_RANGE ).." blocks.",
+	description = "Shows a map of all known villages withhin "..tostring( mg_villages.MAP_RANGE ).." blocks.",
 	privs = {},
 	func = function(name, param)
-		minetest.show_formspec( name, 'mg:world_map', mg.map_of_world( name ));
+		minetest.show_formspec( name, 'mg:world_map', mg_villages.map_of_world( name ));
         end
 });
 

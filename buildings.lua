@@ -1,7 +1,7 @@
 
 --village_types = { 'nore', 'logcabin', 'grasshut', 'medieval', 'charachoal', 'taoki'};
 
-mg.mg_village_sizes = {
+mg_villages.village_sizes = {
 	nore         = { min = 20, max = 40,   texture = 'default_stone_brick.png'},
 	taoki        = { min = 30, max = 70,   texture = 'default_brick.png' },
 --	medieval     = { min = 25, max = 60,   texture = 'cottages_darkage_straw.png'}, -- they often have straw roofs
@@ -14,7 +14,7 @@ mg.mg_village_sizes = {
 }
 
 -- if set to true, the outer buildings in medieval villages will be fields; this is not very convincing yet
-mg.medieval_subtype = false;
+mg_villages.medieval_subtype = false;
 
 buildings = {
 
@@ -235,27 +235,27 @@ if( not( minetest.get_modpath("farming_plus"))) then
 end
 
 -- 'nore' and 'taoki' do not require any other mods; thus, they can be used in all worlds
-mg_village_types = { 'nore', 'taoki'};
+mg_villages.village_types = { 'nore', 'taoki'};
 
 if(         minetest.get_modpath("cottages")) then
-	table.insert( mg_village_types, 'medieval' );
-	table.insert( mg_village_types, 'charachoal' );
-	table.insert( mg_village_types, 'lumberjack' );
-	table.insert( mg_village_types, 'claytrader' ); 
+	table.insert( mg_villages.village_types, 'medieval' );
+	table.insert( mg_villages.village_types, 'charachoal' );
+	table.insert( mg_villages.village_types, 'lumberjack' );
+	table.insert( mg_villages.village_types, 'claytrader' ); 
 
 	if( minetest.get_modpath("glasspanes")) then
-		table.insert( mg_village_types, 'logcabin' );
+		table.insert( mg_villages.village_types, 'logcabin' );
 	end
 end
 
 if( minetest.get_modpath( 'hdb' ) and minetest.get_modpath( 'nbu' )) then
-	table.insert( mg_village_types, 'canadian' );
+	table.insert( mg_villages.village_types, 'canadian' );
 end
 
---mg_village_types = {'lumberjack'};
---mg_village_types = {'medieval'};
---mg_village_types = {'claytrader'};
---mg_village_types = {'grasshut'};
+--mg_villages.village_types = {'lumberjack'};
+--mg_villages.village_types = {'medieval'};
+--mg_villages.village_types = {'claytrader'};
+--mg_villages.village_types = {'grasshut'};
 -- TODO: handle grasshut
 
 -- read the data files and fill in information like size and nodes that need on_construct to be called after placing
@@ -377,8 +377,8 @@ buildings["wall"] = {yoff = 1, ysize = 6, scm = wall}
 --end
 
 
-mg_village_types[ #mg_village_types ] = 'fields';
-for j,v in ipairs( mg_village_types ) do
+mg_villages.village_types[ #mg_villages.village_types ] = 'fields';
+for j,v in ipairs( mg_villages.village_types ) do
 	
 	local total_weight = 0
 	for _, i in ipairs(buildings) do
@@ -398,4 +398,4 @@ for j,v in ipairs( mg_village_types ) do
 	end
 end
 -- the fields do not exist as an independent type
-mg_village_types[ #mg_village_types ] = nil;
+mg_villages.village_types[ #mg_villages.village_types ] = nil;
