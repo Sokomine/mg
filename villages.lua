@@ -620,54 +620,6 @@ local function generate_building(pos, minp, maxp, data, param2_data, a, pr, extr
 end
 
 
-
--- the dirt_with_grass_replacement for the entire mapchunk is usually not fine-graded enough for individual buildings;
--- therefore, we need to check the immediate environment of a house
-mg_get_local_dirt_with_grass = function( pos, size_x, size_z )
-
-	local types = {};
-	local curr_max = 0;
-	local curr_candidate = 'default:dirt_with_grass';
-
-	-- check some positions on ground level sourrounding the area of the building;
-	-- the place where the building will be may already be covered by nodes from the building due to previous spawning from neighbouring mapchunks
-	local positions = {
-		{ x=(pos.x          -1), y=pos.y, z=(pos.z            ) },
-		{ x=(pos.x            ), y=pos.y, z=(pos.z          -1) },
-
-		{ x=(pos.x + size_x +1), y=pos.y, z=(pos.z            ) },
-		{ x=(pos.x + size_x   ), y=pos.y, z=(pos.z          -1) },
-
-		{ x=(pos.x          -1), y=pos.y, z=(pos.z + size_z   ) },
-		{ x=(pos.x            ), y=pos.y, z=(pos.z + size_z +1) },
-
-		{ x=(pos.x + size_x +1), y=pos.y, z=(pos.z + size_z   ) },
-		{ x=(pos.x + size_x   ), y=pos.y, z=(pos.z + size_z +1) },
-		};
-
-	for i, p in ipairs( positions ) do
-		local n = minetest.get_node( p );
-		if( n and n ~= nil and n.name and n.name ~= 'air' and n.name ~= 'ignore'
-			-- only count nodes that are acceptable as replacements for dirt_with_grass
-			and (n.name=='default:dirt' or n.name=='default:dirt_with_grass' or n.name=='default:dirt_with_snow' 
-			     or n.name=='default:sand' or n.name=='mg:dirt_with_dry_grass')) then
-
-			if( not( types[ n.name ] )) then
-				types[ n.name ] = 1;
-			else
-				types[ n.name ] = types[ n.name ] + 1;
-			end
-
-			if( types[ n.name ] > curr_max ) then
-				curr_max = types[ n.name ];
-				curr_candidate = n.name;
-			end
-		end
-	end
-	return curr_candidate;
-end
-
-
 -- similar to generate_building, except that it uses minetest.place_schematic(..) instead of changing voxelmanip data;
 -- this has advantages for nodes that use facedir;
 -- the function is called AFTER the mapgen data has been written in init.lua
@@ -717,9 +669,6 @@ mg_village_place_one_schematic = function( bpos, replacements, pos, mts_path )
 
 	local start_pos = { x=( pos.x           ), y=(pos.y + binfo.yoff              ), z=( pos.z )};
 	local end_pos   = { x=( pos.x+pos.bsizex), y=(pos.y + binfo.yoff + binfo.ysize), z=( pos.z + pos.bsizez )};
-
-	-- check sourrounding nodes for information on which grass type we really ought to use
-	local dirt_with_grass_replacement = mg_get_local_dirt_with_grass( pos, pos.bsizex, pos.bsizez ); 
 
 	-- this function is only responsible for files that are in .mts format
 	if( binfo.is_mts == 1 ) then
@@ -809,9 +758,6 @@ mg_village_place_one_schematic = function( bpos, replacements, pos, mts_path )
 			end
 		end
 	end
-
-	-- save the dirt_with_grass_replacement choosen for this particular building in the village data
-	pos.grass_type = dirt_with_grass_replacement;
 
 	-- TODO: fill chests etc.
 end
