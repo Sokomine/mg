@@ -477,17 +477,26 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 
 	local last_counted_surface    = c_dirt;
 	local count_surface_materials = {};
-	count_surface_materials[ c_ice   ] = 0;
-	count_surface_materials[ c_water ] = 0;
-	count_surface_materials[ c_dirt  ] = 0;
-	count_surface_materials[ c_dry_grass   ] = 0;
-	count_surface_materials[ c_grass       ] = 0;
-	count_surface_materials[ c_sand        ] = 0;
-	count_surface_materials[ c_desert_sand ] = 0;
-	count_surface_materials[ c_dirt_snow   ] = 0;
-	count_surface_materials[ c_snowblock   ] = 0;
-	count_surface_materials[ c_air         ] = 0;
-	count_surface_materials[ c_snow        ] = 0;
+--	count_surface_materials[ c_ice   ] = 0;
+--	count_surface_materials[ c_water ] = 0;
+--	count_surface_materials[ c_dirt  ] = 0;
+--	count_surface_materials[ c_dry_grass   ] = 0;
+--	count_surface_materials[ c_grass       ] = 0;
+--	count_surface_materials[ c_sand        ] = 0;
+--	count_surface_materials[ c_desert_sand ] = 0;
+--	count_surface_materials[ c_dirt_snow   ] = 0;
+--	count_surface_materials[ c_snowblock   ] = 0;
+--	count_surface_materials[ c_air         ] = 0;
+--	count_surface_materials[ c_snow        ] = 0;
+	local block_nr = 1;
+	local surface_mat = { c_ice, c_water, c_dirt, c_dry_grass, c_grass, c_sand, c_desert_sand, c_dirt_snow, c_snowblock, c_air, c_snow };
+	for _,m in ipairs(surface_mat) do
+		count_surface_materials[ m ] = {};
+		for block_nr = 1,25 do
+			count_surface_materials[ m ][ block_nr ] = 0;
+		end		
+	end
+
 	local ni = 1
 	local above_top
 	local liquid_top
@@ -500,6 +509,7 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 	local ni = 0
 	for z = minp.z, maxp.z do
 	for x = minp.x, maxp.x do
+		block_nr =  math.floor((maxp.x - x)/16)*5 +  math.floor((maxp.z - z)/16) + 1;
 		ni = ni + 1
 		local y = math.floor(surface_at_point(x, z, village_noise_map, villages, ni, noise1, noise2, noise3, noise4))
 		humidity = noise_humidity[ni]
@@ -561,11 +571,11 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 				local vi = a:index(x, y, z)
 				if y >= 0 then
 					data[vi] = top
-					count_surface_materials[ top       ] = count_surface_materials[ top       ] + 1;
+					count_surface_materials[ top       ][ block_nr ] = count_surface_materials[ top       ][ block_nr ] + 1;
 					last_counted_surface = top;
 				else
 					data[vi] = top_layer
-					count_surface_materials[ top_layer ] = count_surface_materials[ top_layer ] + 1;
+					count_surface_materials[ top_layer ][ block_nr ] = count_surface_materials[ top_layer ][ block_nr ] + 1;
 					last_counted_surface = top_layer;
 				end
 		end
@@ -610,8 +620,8 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 				data[a:index(x, 0, z)] = liquid_top
 				
 				-- previously, we did count the ocean floor
-				count_surface_materials[ last_counted_surface ] = count_surface_materials[ last_counted_surface ] - 1;
-				count_surface_materials[ liquid_top           ] = count_surface_materials[ liquid_top           ] + 1;
+				count_surface_materials[ last_counted_surface ][ block_nr ] = count_surface_materials[ last_counted_surface ][ block_nr ] - 1;
+				count_surface_materials[ liquid_top           ][ block_nr ] = count_surface_materials[ liquid_top           ][ block_nr ] + 1;
 			end
 		end
 		local tl = math.floor((noise_top_layer[ni]+2.5)*2)
@@ -638,19 +648,39 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 	end
 
 
-	local curr_surface_max = 0;
-	local curr_surface_mat = c_dirt;
+	local curr_surface_max = {};
+	local curr_surface_mat = {};
 	local all_surface_nodes = 0;
-	for k, v in pairs( count_surface_materials ) do
-		if( v > curr_surface_max ) then
-			curr_surface_max = v;
-			curr_surface_mat = k;
+	local count_surface_choices = {};
+	local curr_chunk_max = 0;
+	local curr_chunk_mat = c_dirt;
+	for block_nr = 1, 25 do
+		curr_surface_max[ block_nr ] = 0;
+		curr_surface_mat[ block_nr ] = c_dirt;
+		for k, v in pairs( count_surface_materials ) do
+			if( v[ block_nr ] > curr_surface_max[ block_nr ] ) then
+				curr_surface_max[ block_nr ] = v[ block_nr ];
+				curr_surface_mat[ block_nr ] = k;
+			end
+			all_surface_nodes = all_surface_nodes + v[ block_nr ];
 		end
-		all_surface_nodes = all_surface_nodes + v;
+
+		-- determine a chunk-wise "global" maximum (for 80x80 nodes) over all sub-mapblocks (of 16x16 nodes each)
+		if( not( count_surface_choices[ curr_surface_mat[ block_nr ] ])) then
+			count_surface_choices[ curr_surface_mat[ block_nr ] ] = 1;
+		else
+			count_surface_choices[ curr_surface_mat[ block_nr ] ] = count_surface_choices[ curr_surface_mat[ block_nr ] ] + 1;
+		end
+		if( count_surface_choices[ curr_surface_mat[ block_nr ] ] > curr_chunk_max ) then
+			curr_chunk_mat = curr_surface_mat[ block_nr ];
+			curr_chunk_max = count_surface_choices[ curr_surface_mat[ block_nr ] ];
+		end
 	end
+	curr_surface_mat[ 26 ] = curr_chunk_mat;
+
 	-- store information about already generated mapchunks; but only if there is any surface worth speaking off;
 	-- chunks that are below ground are ignored entirely
-	if( maxp.y>0 and all_surface_nodes > 1800 and curr_surface_max > 100 ) then 
+	if( maxp.y>0 and all_surface_nodes > 1800 and #curr_surface_mat == 26 ) then 
 		-- the map extends about 32000 blocks in each direction from the center; thus, if we map only 1/80 of that, 800x800 fields are enough
 		-- a two-dimensional array is easier to handle later on than a computed index
 		local x_index = math.floor( minp.x/80 );
@@ -660,7 +690,6 @@ local function mg_generate(minp, maxp, emin, emax, vm)
 		mg.mg_generated_map[ x_index ][ math.floor( minp.z/80 ) ] = curr_surface_mat;
 		save_restore.save_data( 'mg_generated_map.data', mg.mg_generated_map );
 	end
-			
 	
 	local va = VoxelArea:new{MinEdge=minp, MaxEdge=maxp}
 	
