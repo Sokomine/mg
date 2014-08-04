@@ -228,10 +228,10 @@ buildings = {
 
 
 -- the schematics for buildings of type 'farm_tiny' grow cotton; the farming_plus fruits would be far more fitting
-mg_fruit_list = {'carrot','potatoe','orange','rhubarb','strawberry','tomato','cotton'};
+mg_villages.fruit_list = {'carrot','potatoe','orange','rhubarb','strawberry','tomato','cotton'};
 -- is farming_plus available? If not, we can't use this
 if( not( minetest.get_modpath("farming_plus"))) then
-	mg_fruit_list = nil;
+	mg_villages.fruit_list = nil;
 end
 
 -- 'nore' and 'taoki' do not require any other mods; thus, they can be used in all worlds
@@ -259,7 +259,7 @@ end
 -- TODO: handle grasshut
 
 -- read the data files and fill in information like size and nodes that need on_construct to be called after placing
-mg_buildings_init = function()
+mg_villages.buildings_init = function()
 
 	local mts_path = minetest.get_modpath("mg").."/schems/";
 	-- determine the size of the given houses
@@ -270,7 +270,7 @@ mg_buildings_init = function()
 		local res  = handle_schematics.analyze_mts_file( mts_path..buildings[ i ].scm ); 
 		-- alternatively, read the mts file
 		if( not( res )) then
-			res = import_scm( buildings[ i ].scm );
+			res = mg_villages.import_scm( buildings[ i ].scm );
 		end
 
 		-- provided the file could be analyzed successfully
@@ -333,11 +333,12 @@ end
 
 
 -- call the initialization function above
-mg_buildings_init();
+mg_villages.buildings_init();
 
 
 --local gravel = minetest.get_content_id("default:gravel")
 local gravel = minetest.get_content_id("default:gravel")
+local c_air  = minetest.get_content_id("air");
 local rgravel = {}
 for i = 1, 2000 do
 	rgravel[i] = gravel

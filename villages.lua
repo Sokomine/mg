@@ -462,6 +462,7 @@ mg_villages.mg_drop_moresnow = function( x, z, y_top, y_bottom, a, data, param2_
 
 		node_below = mg_villages.get_node_somehow( x, y, z, a, data, param2_data );
 		if(     node_above.content == c_air
+		    and node_below.content
 		    and node_below.content ~= c_ignore
 		    and node_below.content ~= c_air ) then
 
@@ -473,28 +474,30 @@ mg_villages.mg_drop_moresnow = function( x, z, y_top, y_bottom, a, data, param2_
 					return;
 				end
 			end
-			if(     node_below.content ~= c_snow 
-			    and node_below.content ~= c_gravel
-			    and node_below.content ~= c_snow ) then
-				local suggested = moresnow.suggest_snow_type( node_below.content, node_below.param2 );
+			if( not(node_below.content)
+			    or  node_below.content == c_gravel
+			    or  node_below.content == c_snow ) then
+				return;
+			end
 
-				-- c_snow_top and c_snow_fence can only exist when the node 2 below is a solid one
-				if(    suggested.new_id == moresnow.c_snow_top
-				    or suggested.new_id == moresnow.c_snow_fence) then	
-					local node_below2 = mg_villages.get_node_somehow( x, y-1, z, a, data, param2_data);
-					if(     node_below2.content ~= c_ignore
-					    and node_below2.content ~= c_air ) then
-						local suggested2 = moresnow.suggest_snow_type( node_below2.content, node_below2.param2 );
+			local suggested = moresnow.suggest_snow_type( node_below.content, node_below.param2 );
 
-						if( suggested2.new_id == moresnow.c_snow ) then
-							return { height = y+1, suggested = suggested };
-						end
+			-- c_snow_top and c_snow_fence can only exist when the node 2 below is a solid one
+			if(    suggested.new_id == moresnow.c_snow_top
+			    or suggested.new_id == moresnow.c_snow_fence) then	
+				local node_below2 = mg_villages.get_node_somehow( x, y-1, z, a, data, param2_data);
+				if(     node_below2.content ~= c_ignore
+				    and node_below2.content ~= c_air ) then
+					local suggested2 = moresnow.suggest_snow_type( node_below2.content, node_below2.param2 );
+
+					if( suggested2.new_id == moresnow.c_snow ) then
+						return { height = y+1, suggested = suggested };
 					end
-				-- it is possible that this is not the right shape; if so, the snow will continue to fall down
-				elseif( suggested.new_id ~= moresnow.c_ignore ) then
-						
-					return { height = y+1, suggested = suggested };
 				end
+			-- it is possible that this is not the right shape; if so, the snow will continue to fall down
+			elseif( suggested.new_id ~= moresnow.c_ignore ) then
+					
+				return { height = y+1, suggested = suggested };
 			end
 			-- TODO return; -- abort; there is no fitting moresnow shape for the node below
 		end
@@ -515,15 +518,15 @@ local function generate_building(pos, minp, maxp, data, param2_data, a, pr, extr
 	end
 
 	if( type(binfo.scm) == "string" and binfo.scm_data_cache and type(binfo.scm_data_cache)=="string" )then
-		scm = minetest.deserialize( binfo.scm_data_cache ); --import_scm(binfo.scm, replacements)
+		scm = minetest.deserialize( binfo.scm_data_cache ); --mg_villages.import_scm(binfo.scm, replacements)
 	-- at first time of spawning, all nodes ought to be defined; thus, we can cache the data
 	elseif( type( binfo.scm ) == "string" ) then
-		scm = import_scm( buildings[ pos.btype ].scm );
+		scm = mg_villages.import_scm( buildings[ pos.btype ].scm );
 		buildings[ pos.btype ].scm_data_cache = minetest.serialize( scm )
 	else
 		scm = binfo.scm
 	end
-	scm = rotate(scm, pos.brotate)
+	scm = mg_villages.rotate_scm(scm, pos.brotate)
 
 
 	-- the fruit is set per building, not per village as the other replacements
@@ -812,8 +815,8 @@ mg_villages.generate_village = function(village, minp, maxp, data, param2_data, 
 		-- now or later; after the first call to this function here, the village data will be final
 		for _, pos in ipairs( bpos ) do
 			local binfo = buildings[pos.btype];
-			if( binfo.farming_plus and binfo.farming_plus == 1 and mg_fruit_list and not pos.furit) then
- 				pos.fruit = mg_fruit_list[ pr_village:next( 1, #mg_fruit_list )];
+			if( binfo.farming_plus and binfo.farming_plus == 1 and mg_villages.fruit_list and not pos.furit) then
+ 				pos.fruit = mg_villages.fruit_list[ pr_village:next( 1, #mg_villages.fruit_list )];
 			end
 		end
 

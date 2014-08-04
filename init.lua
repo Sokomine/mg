@@ -1,21 +1,6 @@
 mg = {}
 
--- reserve namespace for the villages
-mg_villages = {}
-
-mg_villages.all_villages  = {}
-mg_villages.mg_generated_map = {}
-mg_villages.anz_villages = 0;
-
-dofile(minetest.get_modpath(minetest.get_current_modname()).."/save_restore.lua")
-mg_villages.all_villages  = save_restore.restore_data( 'mg_all_villages.data' ); -- read mg_villages.all_villages data saved for this world from previous runs
-mg_villages.mg_generated_map = save_restore.restore_data( 'mg_generated_map.data' );
-
--- adds a command that allows to teleport to a known village
-dofile(minetest.get_modpath(minetest.get_current_modname()).."/chat_commands.lua")
--- protect villages from griefing
-dofile(minetest.get_modpath(minetest.get_current_modname()).."/protection.lua")
-
+dofile(minetest.get_modpath(minetest.get_current_modname()).."/villages_init.lua")
 
 local ENABLE_SNOW = false
 
@@ -143,7 +128,6 @@ function get_bseed2(minp)
 	return wseed + math.floor(87*minp.x/47) + math.floor(73*minp.z/91) + math.floor(31*minp.y/12)
 end
 
-c_air = minetest.get_content_id("air")
 c_ignore = minetest.get_content_id("ignore")
 c_water = minetest.get_content_id("default:water_source")
 
@@ -353,22 +337,7 @@ function add_pinetree(data, a, x, y, z, minp, maxp, pr, snow)
 	end
 end
 
-dofile(minetest.get_modpath(minetest.get_current_modname()).."/we.lua")
-dofile(minetest.get_modpath(minetest.get_current_modname()).."/rotate.lua")
-
--- read size from schematics files directly
-dofile(minetest.get_modpath(minetest.get_current_modname()).."/analyze_mts_file.lua") 
-
-dofile(minetest.get_modpath(minetest.get_current_modname()).."/buildings.lua")
-
--- replace some materials for entire villages randomly
-dofile(minetest.get_modpath(minetest.get_current_modname()).."/replacements.lua")
-
-dofile(minetest.get_modpath(minetest.get_current_modname()).."/villages.lua")
 dofile(minetest.get_modpath(minetest.get_current_modname()).."/ores.lua")
-
--- create and show a map of the world
-dofile(minetest.get_modpath(minetest.get_current_modname()).."/map_of_world.lua")
 
 function get_biome_table(minp, humidity, temperature, range)
 	if range == nil then range = 1 end

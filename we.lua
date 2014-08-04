@@ -6,7 +6,7 @@ local function numk(tbl)
 	return i
 end
 
-function import_scm(scm)
+mg_villages.import_scm = function(scm)
 	local c_ignore = minetest.get_content_id("ignore")
 
 	-- this table will contain the nodes read
